@@ -1,0 +1,26 @@
+# Dependências
+node_modules/
+dist/
+
+# Variáveis de Ambiente e Segredos
+.env
+.env.*
+!.env.example
+!.env.production.example
+
+# Bancos de Dados SQLite
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+prisma/*.db
+prisma/*.db-journal
+prisma/*.db-wal
+prisma/*.db-shm
+
+# Backups e Uploads
+backups/
+backup_*/
+uploads/
+production_uploads/
+test_uploads/

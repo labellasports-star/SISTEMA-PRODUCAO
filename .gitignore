@@ -1,0 +1,36 @@
+# Dependências
+node_modules/
+dist/
+
+# Variáveis de Ambiente e Segredos
+.env
+.env.*
+!.env.example
+!.env.production.example
+
+# Banco de Dados SQLite Local e Backups
+*.db
+*.db*
+*.db-journal
+*.db-wal
+*.db-shm
+*.bak
+*.bak*
+
+# Armazenamento de Arquivos e Backups Industriais
+uploads/
+backend/uploads/
+production_uploads/
+backend/production_uploads/
+test_uploads/
+backend/test_uploads/
+backups/
+backend/backups/
+backend/backup_*/
+scratch/
+
+# Logs de tarefas e do sistema
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

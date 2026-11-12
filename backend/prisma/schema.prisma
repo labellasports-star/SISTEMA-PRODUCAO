@@ -1,0 +1,635 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// -------------------------------------------------------------
+// 1. SETORES INDUSTRIAIS (14 SETORES FIXOS DO FLUXO)
+// -------------------------------------------------------------
+model Sector {
+  id                      String   @id @default(uuid())
+  sequenceOrder           Int      @unique // 1 a 14
+  code                    String   @unique // PRE_VENDA, DESIGN, VENDAS, etc.
+  name                    String
+  description             String?
+  allowsExternalDispatch  Boolean  @default(false) // Se despacha para oficinas de costura
+  allowsReworkOrigin      Boolean  @default(false) // Se pode receber devoluções de retrabalho
+  isActive                Boolean  @default(true)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  users                   User[]
+  currentBatches          OpBatch[]      @relation("CurrentSectorBatches")
+  reworkBatches           OpBatch[]      @relation("ReworkOriginSectorBatches")
+  movementsFrom           OpMovement[]   @relation("MovementsFromSector")
+  movementsTo             OpMovement[]   @relation("MovementsToSector")
+  reworkMovementsTarget   OpMovement[]   @relation("ReworkTargetSector")
+}
+
+// -------------------------------------------------------------
+// 2. USUÁRIOS, PERFIS (RBAC) E PIN DE ASSINATURA DIGITAL
+// -------------------------------------------------------------
+model User {
+  id                String       @id @default(uuid())
+  name              String
+  email             String       @unique
+  passwordHash      String
+  role              String       // ADMIN, GESTOR, OPERADOR, VENDEDOR, DESIGNER
+  signaturePinHash  String?      // Hash do PIN de 4 a 6 dígitos para assinatura de OPs
+  sectorId          String?
+  sector            Sector?      @relation(fields: [sectorId], references: [id])
+  isActive          Boolean      @default(true)
+  phone             String?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  assignedBatches   OpBatch[]    @relation("AssignedOperatorBatches")
+  movementsSigned   OpMovement[] @relation("OperatorMovements")
+  movementsApproved OpMovement[] @relation("ManagerAuthorizerMovements")
+  auditLogs         AuditLog[]
+
+  // Relações do Módulo Comercial e SAC (Etapa 2)
+  sellerQuotations        Quotation[]           @relation("SellerQuotations")
+  designerQuotations      Quotation[]           @relation("DesignerQuotations")
+  customersSold           Customer[]            @relation("CustomerSeller")
+  uploadedAttachments     QuotationAttachment[] @relation("UserUploadedAttachments")
+  createdArtworkVersions  ArtworkVersion[]      @relation("UserCreatedArtworkVersions")
+  timelineActions         QuotationTimeline[]   @relation("UserTimelineActions")
+  sacReviewedOrders       ProductionOrder[]     @relation("SacReviewerUsers")
+
+  // Relações do Setor 11 (Despache para Oficina)
+  createdManifests        DispatchManifest[]    @relation("UserCreatedManifests")
+  reprintedManifests      DispatchManifest[]    @relation("UserReprintedManifests")
+
+  // Relações do Setor 12 (Costura)
+  closedManifests         DispatchManifest[]    @relation("UserClosedManifests")
+  operatorReceipts        SewingReceipt[]       @relation("UserOperatorReceipts")
+
+  // Relações do Setor 13 (Qualidade pós-costura)
+  inspectionsConducted    QualityInspection[]   @relation("UserQualityInspections")
+
+  // Relações do Setor 14 (Expedição e Entrega)
+  createdPackageVolumes   PackageVolume[]       @relation("UserCreatedPackageVolumes")
+  dispatchedDeliveries    DeliveryManifest[]    @relation("UserDispatchedDeliveries")
+  reprintedDeliveries     DeliveryManifest[]    @relation("UserReprintedDeliveries")
+}
+
+// -------------------------------------------------------------
+// 3. OFICINAS DE COSTURA (INTERNAS E PARCEIROS TERCEIRIZADOS)
+// -------------------------------------------------------------
+model SewingPartner {
+  id              String           @id @default(uuid())
+  type            String           // INTERNAL (Célula interna), EXTERNAL (Oficina parceira)
+  name            String
+  documentNumber  String?          // CNPJ ou CPF
+  contactPerson   String?
+  phone           String?
+  address         String?
+  basePricePerPc  Float            @default(0.0)
+  isActive        Boolean          @default(true)
+  notes           String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  dispatches      SewingDispatch[]
+  dispatchManifests DispatchManifest[]
+  qualityInspections QualityInspection[]
+}
+
+// -------------------------------------------------------------
+// 4. CLIENTES E ORÇAMENTOS (PRÉ-VENDA E VENDAS)
+// -------------------------------------------------------------
+model Customer {
+  id              String            @id @default(uuid())
+  companyName     String
+  contactName     String
+  email           String?
+  phone           String
+  cityState       String?
+  notes           String?
+  sellerId        String?
+  seller          User?             @relation("CustomerSeller", fields: [sellerId], references: [id])
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  quotations      Quotation[]
+  productionOrders ProductionOrder[]
+  deliveryManifests DeliveryManifest[]
+}
+
+// -------------------------------------------------------------
+// 4.1 OPORTUNIDADES COMERCIAIS & KANBAN DE PRÉ-VENDA
+// -------------------------------------------------------------
+model Quotation {
+  id                    String                @id @default(uuid())
+  quotationNumber       String                @unique // Ex: ORC-2026-00001
+  customerId            String
+  customer              Customer              @relation(fields: [customerId], references: [id])
+  teamName              String                // Nome do time, atlética, empresa ou projeto
+  
+  // Status do Kanban da Pré-Venda
+  status                String                @default("NOVA_SOLICITACAO")
+  // Valores possíveis:
+  // NOVA_SOLICITACAO, ORCAMENTO_PREPARACAO, ORCAMENTO_ENVIADO, AGUARDANDO_RESPOSTA,
+  // ORCAMENTO_APROVADO, SOLICITACAO_ARTE, DESENVOLVIMENTO_ARTE, AGUARDANDO_APROVACAO_ARTE,
+  // ARTE_EM_ALTERACAO, CONVERTIDA_VENDA, PERDIDA
+
+  productsSummary       String?               // Resumo comercial rápido
+  totalQuantity         Int                   @default(0)
+  budgetAmount          Float                 @default(0.0)
+  discountAmount        Float                 @default(0.0)
+  frozenPriceSnapshot   String?               // Snapshot congelado dos preços oficiais e regras no momento do orçamento
+  desiredDeadline       DateTime?
+  observations          String?
+  rejectionReason       String?
+
+  // Vendedor e Designer responsáveis
+  sellerId              String
+  seller                User                  @relation("SellerQuotations", fields: [sellerId], references: [id])
+  designerId            String?
+  designer              User?                 @relation("DesignerQuotations", fields: [designerId], references: [id])
+
+  // Aprovação da Arte pelo Cliente
+  isArtworkApproved     Boolean               @default(false)
+  artworkApprovalDate   DateTime?
+  artworkApprovedBy     String?               // Nome ou contato do cliente que autorizou
+  artworkApprovalNotes  String?
+
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  items                 QuotationItem[]
+  attachments           QuotationAttachment[]
+  timeline              QuotationTimeline[]
+  designBrief           DesignBrief?
+  productionOrder       ProductionOrder?
+}
+
+// -------------------------------------------------------------
+// 4.2 ITENS E GRADE DO PEDIDO (PRODUTOS, TAMANHOS, PERSONALIZAÇÃO)
+// -------------------------------------------------------------
+model QuotationItem {
+  id                  String     @id @default(uuid())
+  quotationId         String
+  quotation           Quotation  @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+  productModel        String     // Ex: Camisa Polo DryFit, Calção, Jaqueta
+  catalogProductId    String?    // ID do produto no catálogo oficial
+  gender              String     @default("UNISSEX") // MASCULINO, FEMININO, INFANTIL, UNISSEX
+  size                String     // PP, P, M, G, GG, XG, 2, 4, 6...
+  quantity            Int
+  unitPrice           Float      @default(0.0) // Preço unitário aplicado
+  subtotal            Float      @default(0.0) // Subtotal = quantity * unitPrice
+  customName          String?    // Ex: "SILVA"
+  customNumber        String?    // Ex: "10"
+  fabricType          String?    // Ex: "Cacharrel Dry 100% Poliéster"
+  collarType          String?    // Ex: "Gola Polo", "Gola V", "Gola Redonda"
+  customizationNotes  String?    // Ex: "Aplicação TPU 3D", "Patrocínio frontal"
+  createdAt           DateTime   @default(now())
+}
+
+// -------------------------------------------------------------
+// 4.3 ARQUIVOS ANEXOS E REFERÊNCIAS (PNG, JPG, PDF, PSD, CDR)
+// -------------------------------------------------------------
+model QuotationAttachment {
+  id              String     @id @default(uuid())
+  quotationId     String
+  quotation       Quotation  @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+  fileName        String
+  fileType        String     // REFERENCE, ARTWORK_PREVIEW, ARTWORK_VECTOR, CLIENT_PROOF
+  fileExtension   String     // PNG, JPG, PDF, PSD, CDR, AI
+  fileSize        Int?       // Bytes
+  fileUrl         String     // Caminho relativo ou URL
+  uploadedById    String
+  uploadedBy      User       @relation("UserUploadedAttachments", fields: [uploadedById], references: [id])
+  createdAt       DateTime   @default(now())
+}
+
+// -------------------------------------------------------------
+// 4.4 BRIEFING DE DESIGN E HISTÓRICO DE VERSÕES DA ARTE
+// -------------------------------------------------------------
+model DesignBrief {
+  id                  String           @id @default(uuid())
+  quotationId         String           @unique
+  quotation           Quotation        @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+  briefingText        String           // Descrição das ideias do cliente
+  predominantColors   String?          // Ex: "Azul Marinho e Dourado"
+  printType           String?          // Ex: "Sublimação Total", "Bordado"
+  status              String           @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  versions            ArtworkVersion[]
+}
+
+model ArtworkVersion {
+  id              String      @id @default(uuid())
+  designBriefId   String
+  designBrief     DesignBrief @relation(fields: [designBriefId], references: [id], onDelete: Cascade)
+  versionNumber   Int         // 1, 2, 3...
+  previewUrl      String?     // Imagem PNG/JPG para exibição ao cliente
+  vectorUrl       String?     // Arquivo mestre (PDF, PSD, CDR)
+  changeNotes     String?     // O que mudou nesta versão
+  designerId      String
+  designer        User        @relation("UserCreatedArtworkVersions", fields: [designerId], references: [id])
+  status          String      @default("SUBMITTED") // SUBMITTED, REVISION_REQUESTED, APPROVED
+  createdAt       DateTime    @default(now())
+}
+
+// -------------------------------------------------------------
+// 4.5 HISTÓRICO DE EVENTOS E ALTERAÇÕES DO ORÇAMENTO (TIMELINE)
+// -------------------------------------------------------------
+model QuotationTimeline {
+  id              String     @id @default(uuid())
+  quotationId     String
+  quotation       Quotation  @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+  fromStatus      String?
+  toStatus        String
+  userId          String
+  user            User       @relation("UserTimelineActions", fields: [userId], references: [id])
+  notes           String?
+  createdAt       DateTime   @default(now())
+}
+
+// -------------------------------------------------------------
+// 5. ORDENS DE PRODUÇÃO (OP CENTRALIZADA)
+// -------------------------------------------------------------
+model ProductionOrder {
+  id                    String      @id @default(uuid())
+  opNumber              String      @unique // Ex: OP-2026-00001
+  customerId            String
+  customer              Customer    @relation(fields: [customerId], references: [id])
+  quotationId           String?     @unique
+  quotation             Quotation?  @relation(fields: [quotationId], references: [id])
+  title                 String      // Nome do Projeto / Pedido (ex: 120 Camisas Polo Empresa X)
+  productType           String      // Camisas, Uniformes, Moletons, etc.
+  totalQuantityOrdered  Int
+  totalQuantityDone     Int         @default(0)
+  totalQuantityRework   Int         @default(0)
+  totalQuantityDelivered Int        @default(0)
+  priority              String      @default("NORMAL") // BAIXA, NORMAL, ALTA, URGENTE
+  status                String      @default("ACTIVE") // ACTIVE, COMPLETED, CANCELLED
+  promisedDeliveryDate  DateTime?
+  technicalNotes        String?
+  artworkUrl            String?     // Link da arte aprovada
+  
+  // Validação do SAC Interno (Setor 4)
+  sacApprovalStatus     String      @default("PENDING_REVIEW") // PENDING_REVIEW, APPROVED, REJECTED
+  sacRejectionReason    String?
+  sacReviewedById       String?
+  sacReviewedBy         User?       @relation("SacReviewerUsers", fields: [sacReviewedById], references: [id])
+  sacReviewedAt         DateTime?
+
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+
+  batches               OpBatch[]
+  dispatchManifests     DispatchManifest[]
+  deliveryManifests     DeliveryManifest[]
+}
+
+// -------------------------------------------------------------
+// 6. LOTES PARCIAIS DA OP (SUPORTE NATIVO A DIVISÃO DE LOTES)
+// -------------------------------------------------------------
+model OpBatch {
+  id                    String         @id @default(uuid())
+  batchNumber           String         @unique // Ex: OP-2026-00001-L01
+  productionOrderId     String
+  productionOrder       ProductionOrder @relation(fields: [productionOrderId], references: [id], onDelete: Cascade)
+  quantity              Int            // Quantidade de peças deste lote específico
+  currentSectorId       String
+  currentSector         Sector         @relation("CurrentSectorBatches", fields: [currentSectorId], references: [id])
+  assignedOperatorId    String?
+  assignedOperator      User?          @relation("AssignedOperatorBatches", fields: [assignedOperatorId], references: [id])
+  
+  // Status do lote no setor atual: WAITING, IN_PROGRESS, COMPLETED, REWORK, DELIVERED
+  batchStatus           String         @default("WAITING")
+  
+  // Controle de Retrabalho
+  isUnderRework         Boolean        @default(false)
+  reworkOriginSectorId  String?
+  reworkOriginSector    Sector?        @relation("ReworkOriginSectorBatches", fields: [reworkOriginSectorId], references: [id])
+  reworkReason          String?
+  reworkNotes           String?
+
+  // Desmembramento e Subdivisões (ex: OP - 2001 - 1/5)
+  subdivisionCode       String?        // Ex: "1/5", "2/5"
+  sizeGridJson          String?        // JSON breakdown da grade deste sublote específico
+  parentBatchId         String?        // ID do lote pai em caso de desmembramento parcial
+
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+
+  movements             OpMovement[]
+  sewingDispatches      SewingDispatch[]
+  dispatchManifests     DispatchManifest[]
+  sewingReceipts        SewingReceipt[]
+  qualityInspections    QualityInspection[]
+  packageVolumes        PackageVolume[]
+  deliveryManifests     DeliveryManifest[]
+}
+
+// -------------------------------------------------------------
+// 7. HISTÓRICO DE MOVIMENTAÇÕES E ASSINATURAS DIGITAIS
+// -------------------------------------------------------------
+model OpMovement {
+  id                    String        @id @default(uuid())
+  opBatchId             String
+  opBatch               OpBatch       @relation(fields: [opBatchId], references: [id], onDelete: Cascade)
+  fromSectorId          String
+  fromSector            Sector        @relation("MovementsFromSector", fields: [fromSectorId], references: [id])
+  toSectorId            String
+  toSector              Sector        @relation("MovementsToSector", fields: [toSectorId], references: [id])
+  operatorId            String
+  operator              User          @relation("OperatorMovements", fields: [operatorId], references: [id])
+  managerAuthorizerId   String?
+  managerAuthorizer     User?         @relation("ManagerAuthorizerMovements", fields: [managerAuthorizerId], references: [id])
+  
+  movementType          String        @default("FORWARD") // FORWARD, REWORK_RETURN, REWORK_RESOLVED
+  
+  // Horários e Tempos de Execução
+  receivedAt            DateTime      @default(now())
+  startedAt             DateTime?
+  finishedAt            DateTime?
+
+  // Assinatura digital criptografada gerada no servidor
+  digitalSignatureHash  String        // SHA-256(batchId + operatorId + toSectorId + timestamp + salt)
+  signerPinVerified     Boolean       @default(true)
+
+  // Dados de Retrabalho (quando aplicável na Qualidade ou outro setor)
+  reworkDefectType      String?       // IMPRESSAO, CALANDRA, COSTURA, TECIDO, OUTRO
+  reworkTargetSectorId  String?
+  reworkTargetSector    Sector?       @relation("ReworkTargetSector", fields: [reworkTargetSectorId], references: [id])
+  reworkQuantity        Int?
+  reworkPhotosJson      String?       // Lista de URLs de fotos dos defeitos em JSON
+
+  notes                 String?
+  createdAt             DateTime      @default(now())
+}
+
+// -------------------------------------------------------------
+// 8. CONTROLE DE REMESSAS DE COSTURA (OFICINAS EXTERNAS/INTERNAS)
+// -------------------------------------------------------------
+model SewingDispatch {
+  id                    String        @id @default(uuid())
+  dispatchNumber        String        @unique // Ex: REM-2026-0001
+  opBatchId             String
+  opBatch               OpBatch       @relation(fields: [opBatchId], references: [id])
+  sewingPartnerId       String
+  sewingPartner         SewingPartner @relation(fields: [sewingPartnerId], references: [id])
+  
+  quantitySent          Int
+  dispatchedAt          DateTime      @default(now())
+  expectedReturnDate    DateTime?
+  pricePerPiece         Float         @default(0.0)
+  totalPrice            Float         @default(0.0)
+
+  quantityReceived      Int           @default(0)
+  quantityApproved      Int           @default(0)
+  quantityRejected      Int           @default(0)
+  receivedAt            DateTime?
+  
+  // SENT, IN_PROGRESS, RECEIVED_PARTIAL, RECEIVED_COMPLETE, RETURNED
+  status                String        @default("SENT")
+  notes                 String?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+}
+
+// -------------------------------------------------------------
+// 8.1 ROMANEIOS DE ENVIO PARA OFICINA (SETOR 11 - DESPACHE)
+// -------------------------------------------------------------
+model DispatchManifest {
+  id                    String          @id @default(uuid())
+  manifestNumber        String          @unique // Ex: RE-2026-00001
+  opBatchId             String
+  opBatch               OpBatch         @relation(fields: [opBatchId], references: [id])
+  productionOrderId     String
+  productionOrder       ProductionOrder @relation(fields: [productionOrderId], references: [id])
+  sewingPartnerId       String
+  sewingPartner         SewingPartner   @relation(fields: [sewingPartnerId], references: [id])
+
+  totalQuantity         Int
+  sizeGridBreakdown     String          // JSON: { "P": 10, "M": 20, "G": 20 }
+  expectedReturnDate    DateTime
+
+  createdById           String
+  createdBy             User            @relation("UserCreatedManifests", fields: [createdById], references: [id])
+
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+
+  reprintCount          Int             @default(0)
+  lastReprintAt         DateTime?
+  lastReprintById       String?
+  lastReprintBy         User?           @relation("UserReprintedManifests", fields: [lastReprintById], references: [id])
+
+  digitalSignatureHash  String?
+  qrPayload             String?         // Payload estruturado para QR Code
+  notes                 String?
+
+  // Controle de Recebimento da Oficina (Setor 12 - Costura)
+  receiptStatus         String          @default("PENDING") // PENDING, PARTIALLY_RECEIVED, CLOSED, CLOSED_WITH_DIVERGENCE
+  isReceiptClosed       Boolean         @default(false)
+  closedAt              DateTime?
+  closedById            String?
+  closedBy              User?           @relation("UserClosedManifests", fields: [closedById], references: [id])
+  divergenceJustification String?
+
+  receipts              SewingReceipt[]
+  qualityInspections    QualityInspection[]
+}
+
+// -------------------------------------------------------------
+// 8.2 REGISTROS DE RECEBIMENTO DA OFICINA (SETOR 12 - COSTURA)
+// -------------------------------------------------------------
+model SewingReceipt {
+  id                    String              @id @default(uuid())
+  dispatchManifestId    String
+  dispatchManifest      DispatchManifest    @relation(fields: [dispatchManifestId], references: [id], onDelete: Cascade)
+  opBatchId             String
+  opBatch               OpBatch             @relation(fields: [opBatchId], references: [id], onDelete: Cascade)
+  receiptNumber         Int                 @default(1)
+  receivedAt            DateTime            @default(now())
+
+  operatorId            String
+  operator              User                @relation("UserOperatorReceipts", fields: [operatorId], references: [id])
+
+  totalReceivedOk       Int                 @default(0)
+  totalMissing          Int                 @default(0)
+  totalDamaged          Int                 @default(0)
+
+  digitalSignatureHash  String?
+  notes                 String?
+
+  items                 SewingReceiptItem[]
+
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+}
+
+model SewingReceiptItem {
+  id                  String        @id @default(uuid())
+  sewingReceiptId     String
+  sewingReceipt       SewingReceipt @relation(fields: [sewingReceiptId], references: [id], onDelete: Cascade)
+  size                String        // Ex: "P", "M", "G", "GG"
+  quantityReceivedOk  Int           @default(0)
+  quantityMissing     Int           @default(0)
+  quantityDamaged     Int           @default(0)
+}
+
+// -------------------------------------------------------------
+// 8.3 CONTROLE DE QUALIDADE PÓS-COSTURA (SETOR 13)
+// -------------------------------------------------------------
+model DefectType {
+  id                    String                   @id @default(uuid())
+  code                  String                   @unique
+  name                  String
+  isActive              Boolean                  @default(true)
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
+
+  inspectionDefects     QualityInspectionDefect[]
+}
+
+model QualityInspection {
+  id                    String                   @id @default(uuid())
+  opBatchId             String
+  opBatch               OpBatch                  @relation(fields: [opBatchId], references: [id], onDelete: Cascade)
+  dispatchManifestId    String?
+  dispatchManifest      DispatchManifest?        @relation(fields: [dispatchManifestId], references: [id])
+  sewingPartnerId       String?
+  sewingPartner         SewingPartner?           @relation(fields: [sewingPartnerId], references: [id])
+  inspectorId           String
+  inspector             User                     @relation("UserQualityInspections", fields: [inspectorId], references: [id])
+  inspectedAt           DateTime                 @default(now())
+  result                String                   // APPROVED_TOTAL, APPROVED_PARTIAL, REJECTED_TOTAL
+  totalInspected        Int
+  totalApproved         Int
+  totalDefective        Int
+  digitalSignatureHash  String?
+  notes                 String?
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
+
+  defects               QualityInspectionDefect[]
+}
+
+model QualityInspectionDefect {
+  id                  String            @id @default(uuid())
+  qualityInspectionId String
+  qualityInspection   QualityInspection @relation(fields: [qualityInspectionId], references: [id], onDelete: Cascade)
+  defectTypeId        String
+  defectType          DefectType        @relation(fields: [defectTypeId], references: [id])
+  size                String            // "P", "M", "G", etc.
+  quantity            Int
+}
+
+// -------------------------------------------------------------
+// 8.4 EMBALAGEM, EXPEDIÇÃO E ENTREGA FINAL (SETOR 14)
+// -------------------------------------------------------------
+model PackageVolume {
+  id                  String            @id @default(uuid())
+  opBatchId           String
+  opBatch             OpBatch           @relation(fields: [opBatchId], references: [id], onDelete: Cascade)
+  volumeNumber        Int
+  labelQrCode         String
+  sizeBreakdown       String            // JSON: { "P": 10, "M": 20 }
+  quantity            Int
+  weightKg            Float?
+  createdById         String
+  createdBy           User              @relation("UserCreatedPackageVolumes", fields: [createdById], references: [id])
+  deliveryManifestId  String?
+  deliveryManifest    DeliveryManifest? @relation(fields: [deliveryManifestId], references: [id])
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+}
+
+model DeliveryManifest {
+  id                    String          @id @default(uuid())
+  manifestNumber        String          @unique // RD-YYYY-XXXXX
+  productionOrderId     String
+  productionOrder       ProductionOrder @relation(fields: [productionOrderId], references: [id])
+  opBatchId             String?
+  opBatch               OpBatch?        @relation(fields: [opBatchId], references: [id])
+  customerId            String
+  customer              Customer        @relation(fields: [customerId], references: [id])
+  totalQuantity         Int
+  sizeGridBreakdown     String          // JSON: { "P": 10, "M": 20 }
+  carrierName           String          // Transportadora ou Entregador
+  carrierDocument       String?
+  carrierPhone          String?
+  notes                 String?
+  digitalSignatureHash  String?
+  qrPayload             String?
+  reprintCount          Int             @default(0)
+  lastReprintAt         DateTime?
+  lastReprintById       String?
+  lastReprintBy         User?           @relation("UserReprintedDeliveries", fields: [lastReprintById], references: [id])
+  isDelivered           Boolean         @default(false)
+  deliveredAt           DateTime?
+  deliveredRecipient    String?
+  deliveredNotes        String?
+  dispatchedById        String
+  dispatchedBy          User            @relation("UserDispatchedDeliveries", fields: [dispatchedById], references: [id])
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+
+  volumes               PackageVolume[]
+}
+
+// -------------------------------------------------------------
+// 9. AUDITORIA IMUTÁVEL (APPEND-ONLY AUDIT LOG)
+// -------------------------------------------------------------
+model AuditLog {
+  id          String   @id @default(uuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  action      String   // LOGIN, USER_CREATED, OP_TRANSITION, PIN_VERIFIED, etc.
+  entityName  String   // User, ProductionOrder, OpBatch, SewingDispatch, Sector
+  entityId    String?
+  oldValues   String?  // JSON stringificado dos dados anteriores
+  newValues   String?  // JSON stringificado dos novos dados
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+}
+
+// -------------------------------------------------------------
+// 10. CATÁLOGO OFICIAL DE PRODUTOS E PREÇOS (LABELLA SPORTS)
+// -------------------------------------------------------------
+model ProductCategory {
+  id          String           @id @default(uuid())
+  code        String           @unique // FUTEBOL, VOLEI, BASQUETE, CORRIDA, CICLISMO, CORPORATIVO, ETC.
+  name        String
+  description String?
+  isActive    Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  products    CatalogProduct[]
+}
+
+model CatalogProduct {
+  id                      String           @id @default(uuid())
+  categoryId              String
+  category                ProductCategory  @relation(fields: [categoryId], references: [id])
+  code                    String           @unique // CAMISA_CLASSIC, CAMISA_PRIME, CAMISA_POLO, etc.
+  name                    String
+  description             String?
+  minQuantity             Int              @default(10) // Quantidade mínima do catálogo oficial
+  basePrice               Float            // Preço base oficial congelado
+  priceEffectiveDate      DateTime         @default(now()) // Data de referência da tabela de preços
+  imageUrl                String?          // Foto / render do produto no catálogo oficial
+  availableFabrics        String           // JSON: ["Dry Fit Tradicional", "Dry Texturizado", "Dry Sport Favo"]
+  availableCollars        String?          // JSON: ["Gola Redonda", "Gola V", "Gola Polo"]
+  availableGenders        String           @default("[\"UNISSEX\",\"MASCULINO\",\"FEMININO\",\"INFANTIL\"]")
+  availableCustomizations String?          // JSON: [{"code":"NOME","name":"Nome Individual","price":5.0},{"code":"NUMERO","name":"Número","price":5.0},{"code":"TPU_3D","name":"Escudo TPU 3D","price":15.0}]
+  isActive                Boolean          @default(true)
+  createdAt               DateTime         @default(now())
+  updatedAt               DateTime         @updatedAt
+}
+
