@@ -163,6 +163,69 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
+// Rota raiz amigável para evitar erro caso o usuário acesse a porta do backend (4000) no navegador
+app.get("/", (req, res) => {
+  if (req.accepts("html")) {
+    return res.send(`<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="refresh" content="2;url=http://localhost:5173">
+  <title>PCP Industrial Labella Sports - Backend Online</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #0f172a; color: #f8fafc; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 1rem; box-sizing: border-box; }
+    .card { background: #1e293b; padding: 2.5rem; border-radius: 1rem; border: 1px solid #334155; text-align: center; max-width: 520px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
+    .badge { background: #10b981; color: #022c22; font-weight: bold; padding: 0.35rem 0.85rem; border-radius: 9999px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; margin-bottom: 1.25rem; }
+    h1 { margin: 0 0 0.75rem 0; font-size: 1.5rem; color: #ffffff; }
+    p { color: #94a3b8; font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.5rem; }
+    a.btn { display: inline-block; background: #2563eb; color: #ffffff; padding: 0.85rem 1.75rem; border-radius: 0.5rem; text-decoration: none; font-weight: 600; font-size: 1rem; transition: background 0.2s; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.4); }
+    a.btn:hover { background: #1d4ed8; }
+    .footer { margin-top: 1.5rem; font-size: 0.82rem; color: #64748b; }
+    .footer strong { color: #cbd5e1; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="badge">● Backend Online (Porta 4000)</div>
+    <h1>API PCP Industrial Labella Sports</h1>
+    <p>O servidor backend da fábrica está <strong>100% online e operando</strong>. A interface visual do sistema roda na porta <strong>5173</strong>. Clique no botão abaixo para acessar:</p>
+    <a href="http://localhost:5173" class="btn">Acessar Sistema Visual (Porta 5173) &rarr;</a>
+    <div class="footer">Redirecionando automaticamente em 2 segundos...<br/>Acesso Celular / LAN: <strong>http://192.168.1.35:5173</strong></div>
+  </div>
+</body>
+</html>`);
+  }
+  res.json({
+    system: "PCP Industrial - Fábrica de Uniformes Labella Sports",
+    status: "online",
+    message: "Servidor backend operando normalmente na porta 4000.",
+    frontendUrl: "http://localhost:5173",
+    healthCheck: "/api/health",
+  });
+});
+
+app.get("/api", (_req, res) => {
+  res.json({
+    system: "PCP Industrial - Fábrica de Uniformes Labella Sports",
+    status: "online",
+    version: "2.0.0",
+    modules: [
+      "auth",
+      "users",
+      "sectors",
+      "customers",
+      "quotations",
+      "production",
+      "design",
+      "batches",
+      "dashboard",
+      "universal-sheet",
+      "catalog"
+    ]
+  });
+});
+
 // Rotas da API
 app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
