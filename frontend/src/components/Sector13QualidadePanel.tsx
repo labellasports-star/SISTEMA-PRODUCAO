@@ -308,33 +308,33 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
   return (
     <div className="space-y-6">
       {/* Top Header */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+      <div className="rounded-2xl bg-slate-900 border border-slate-800 p-6 shadow-xl">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl border border-indigo-100">
+            <div className="p-3 bg-indigo-500/10 text-indigo-400 rounded-xl border border-indigo-500/20">
               <ShieldCheck className="w-7 h-7" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-bold text-slate-800">Setor 13 — Qualidade Pós-Costura</h1>
-                <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-700">
-                  Rastreabilidade & Conformidade
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                  SETOR 13
                 </span>
+                <h1 className="text-2xl font-bold text-white">Qualidade Pós-Costura</h1>
               </div>
-              <p className="text-sm text-slate-500 mt-0.5">
+              <p className="text-sm text-slate-400 mt-0.5">
                 Inspeção minuciosa de peças, controle de defeitos por oficina, assinaturas digitais HMAC e retorno para retrabalho.
               </p>
             </div>
           </div>
 
           {/* Sub-Abas de Navegação Interna */}
-          <div className="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200">
+          <div className="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800">
             <button
               onClick={() => setActiveSubTab("queue")}
-              className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-md transition-all ${
+              className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${
                 activeSubTab === "queue"
-                  ? "bg-white text-indigo-600 shadow-sm"
-                  : "text-slate-600 hover:text-slate-900"
+                  ? "bg-slate-800 text-white shadow-sm border border-slate-700"
+                  : "text-slate-400 hover:text-slate-200"
               }`}
             >
               <Clock className="w-3.5 h-3.5" />
@@ -342,10 +342,10 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
             </button>
             <button
               onClick={() => setActiveSubTab("indicators")}
-              className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-md transition-all ${
+              className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${
                 activeSubTab === "indicators"
-                  ? "bg-white text-indigo-600 shadow-sm"
-                  : "text-slate-600 hover:text-slate-900"
+                  ? "bg-slate-800 text-white shadow-sm border border-slate-700"
+                  : "text-slate-400 hover:text-slate-200"
               }`}
             >
               <TrendingDown className="w-3.5 h-3.5" />
@@ -353,10 +353,10 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
             </button>
             <button
               onClick={() => setActiveSubTab("defectTypes")}
-              className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-md transition-all ${
+              className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${
                 activeSubTab === "defectTypes"
-                  ? "bg-white text-indigo-600 shadow-sm"
-                  : "text-slate-600 hover:text-slate-900"
+                  ? "bg-slate-800 text-white shadow-sm border border-slate-700"
+                  : "text-slate-400 hover:text-slate-200"
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
@@ -367,22 +367,22 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
 
         {/* Mensagens de Sucesso ou Erro */}
         {error && (
-          <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg flex items-center justify-between">
+          <div className="mt-4 p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 flex items-center justify-between text-sm">
             <div className="flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+              <AlertTriangle className="w-4 h-4 flex-shrink-0 text-rose-400" />
               <span>{error}</span>
             </div>
-            <button onClick={() => setError("")} className="text-red-500 hover:text-red-700 font-bold">×</button>
+            <button onClick={() => setError("")} className="text-rose-400 hover:text-rose-200 font-bold">×</button>
           </div>
         )}
 
         {successMessage && (
-          <div className="mt-4 p-3 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm rounded-lg flex items-center justify-between">
+          <div className="mt-4 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 flex items-center justify-between text-sm">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+              <CheckCircle2 className="w-4 h-4 flex-shrink-0 text-emerald-400" />
               <span>{successMessage}</span>
             </div>
-            <button onClick={() => setSuccessMessage("")} className="text-emerald-500 hover:text-emerald-700 font-bold">×</button>
+            <button onClick={() => setSuccessMessage("")} className="text-emerald-400 hover:text-emerald-200 font-bold">×</button>
           </div>
         )}
       </div>
@@ -392,39 +392,39 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
         <div className="space-y-6">
           {/* Métricas Rápidas */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-              <div className="text-xs font-medium text-slate-500">Lotes para Inspecionar</div>
-              <div className="text-2xl font-bold text-slate-800 mt-1">{queueMetrics.totalBatches}</div>
-              <div className="text-xs text-slate-400 mt-0.5">Disponíveis na Qualidade</div>
+            <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow-xl">
+              <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Lotes para Inspecionar</div>
+              <div className="text-2xl font-bold text-white mt-1">{queueMetrics.totalBatches}</div>
+              <div className="text-xs text-slate-500 mt-0.5">Disponíveis na Qualidade</div>
             </div>
-            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-              <div className="text-xs font-medium text-slate-500">Total de Peças a Inspecionar</div>
-              <div className="text-2xl font-bold text-indigo-600 mt-1">{queueMetrics.totalPieces}</div>
-              <div className="text-xs text-slate-400 mt-0.5">Soma física dos lotes</div>
+            <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow-xl">
+              <div className="text-[11px] font-semibold text-indigo-400 uppercase tracking-wider">Total de Peças a Inspecionar</div>
+              <div className="text-2xl font-bold text-indigo-300 mt-1">{queueMetrics.totalPieces}</div>
+              <div className="text-xs text-slate-500 mt-0.5">Soma física dos lotes</div>
             </div>
-            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-              <div className="text-xs font-medium text-slate-500">Aguardando Avaliação</div>
-              <div className="text-2xl font-bold text-amber-600 mt-1">{queueMetrics.pendingCount}</div>
-              <div className="text-xs text-slate-400 mt-0.5">Status PENDING / WAITING</div>
+            <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow-xl">
+              <div className="text-[11px] font-semibold text-amber-400 uppercase tracking-wider">Aguardando Avaliação</div>
+              <div className="text-2xl font-bold text-amber-300 mt-1">{queueMetrics.pendingCount}</div>
+              <div className="text-xs text-slate-500 mt-0.5">Status PENDING / WAITING</div>
             </div>
-            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-              <div className="text-xs font-medium text-slate-500">Lotes em Retrabalho</div>
-              <div className="text-2xl font-bold text-rose-600 mt-1">{queueMetrics.reworkCount}</div>
-              <div className="text-xs text-slate-400 mt-0.5">Vindos de correção</div>
+            <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow-xl">
+              <div className="text-[11px] font-semibold text-rose-400 uppercase tracking-wider">Lotes em Retrabalho</div>
+              <div className="text-2xl font-bold text-rose-300 mt-1">{queueMetrics.reworkCount}</div>
+              <div className="text-xs text-slate-500 mt-0.5">Vindos de correção</div>
             </div>
           </div>
 
           {/* Lista de Lotes em Inspeção */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="p-4 border-b border-slate-200 flex items-center justify-between">
+          <div className="bg-slate-900 rounded-2xl shadow-xl border border-slate-800 overflow-hidden">
+            <div className="p-4 border-b border-slate-800 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-indigo-600" />
-                <h3 className="font-semibold text-slate-800">Lotes Posicionados para Inspeção de Qualidade</h3>
+                <ShieldCheck className="w-5 h-5 text-indigo-400" />
+                <h3 className="font-semibold text-white">Lotes Posicionados para Inspeção de Qualidade</h3>
               </div>
               <button
                 onClick={loadQueue}
                 disabled={loading}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors border border-slate-700"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
                 Atualizar Fila
@@ -432,15 +432,15 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
             </div>
 
             {loading ? (
-              <div className="p-12 text-center text-slate-500">
-                <RefreshCw className="w-8 h-8 animate-spin mx-auto text-indigo-600 mb-2" />
+              <div className="p-12 text-center text-slate-400">
+                <RefreshCw className="w-8 h-8 animate-spin mx-auto text-indigo-400 mb-2" />
                 Carregando lotes da Qualidade...
               </div>
             ) : queueBatches.length === 0 ? (
-              <div className="p-12 text-center text-slate-500">
-                <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
-                <p className="font-medium text-slate-700">Nenhum lote pendente de inspeção</p>
-                <p className="text-xs text-slate-400 mt-1">
+              <div className="py-16 text-center">
+                <CheckCircle2 className="h-10 w-10 text-slate-600 mx-auto mb-2" />
+                <h4 className="text-sm font-semibold text-slate-300">Nenhum lote pendente de inspeção</h4>
+                <p className="text-xs text-slate-500 mt-1">
                   Todos os lotes vindos da Costura foram inspecionados ou encaminhados para a Expedição / Retrabalho.
                 </p>
               </div>
@@ -448,7 +448,7 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-sm">
                   <thead>
-                    <tr className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600">
+                    <tr className="bg-slate-950 border-b border-slate-800 text-xs font-semibold text-slate-400">
                       <th className="py-3 px-4">Lote / OP</th>
                       <th className="py-3 px-4">Cliente / Produto</th>
                       <th className="py-3 px-4 text-center">Quantidade</th>
@@ -457,36 +457,36 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
                       <th className="py-3 px-4 text-right">Ação</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-slate-800/60">
                     {queueBatches.map((batch: any) => (
-                      <tr key={batch.id} className="hover:bg-slate-50/70 transition-colors">
+                      <tr key={batch.id} className="hover:bg-slate-800/40 transition-colors">
                         <td className="py-3 px-4">
-                          <div className="font-semibold text-slate-800">{batch.batchNumber}</div>
+                          <div className="font-semibold text-white">{batch.batchNumber}</div>
                           <div className="text-xs text-slate-400 font-mono">{batch.productionOrder?.opNumber}</div>
                         </td>
                         <td className="py-3 px-4">
-                          <div className="text-slate-800 font-medium">{batch.productionOrder?.customer?.companyName || "Cliente"}</div>
-                          <div className="text-xs text-slate-500">{batch.productionOrder?.title || batch.productionOrder?.productType}</div>
+                          <div className="text-slate-200 font-medium">{batch.productionOrder?.customer?.companyName || "Cliente"}</div>
+                          <div className="text-xs text-slate-400">{batch.productionOrder?.title || batch.productionOrder?.productType}</div>
                         </td>
                         <td className="py-3 px-4 text-center">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                             {batch.quantity} pçs
                           </span>
                         </td>
                         <td className="py-3 px-4">
                           <div className="flex flex-col gap-1 items-start">
-                            <span className="px-2 py-0.5 text-xs rounded font-medium bg-amber-50 text-amber-700 border border-amber-200">
+                            <span className="px-2 py-0.5 text-xs rounded font-medium bg-amber-500/20 text-amber-300 border border-amber-500/30">
                               {batch.batchStatus}
                             </span>
                             {batch.isUnderRework && (
-                              <span className="px-2 py-0.5 text-xs rounded font-medium bg-rose-50 text-rose-700 border border-rose-200 flex items-center gap-1">
+                              <span className="px-2 py-0.5 text-xs rounded font-medium bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center gap-1">
                                 <AlertTriangle className="w-3 h-3" />
                                 Em Retrabalho: {batch.reworkReason || "Reprovado anteriormente"}
                               </span>
                             )}
                           </div>
                         </td>
-                        <td className="py-3 px-4 text-xs text-slate-500">
+                        <td className="py-3 px-4 text-xs text-slate-400">
                           {new Date(batch.updatedAt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
                         </td>
                         <td className="py-3 px-4 text-right">
@@ -496,7 +496,7 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
                               setSelectedSheetBatchId(batch.id);
                               setIsSheetModalOpen(true);
                             }}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-lg text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 transition-all mr-1.5"
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-lg text-sky-400 bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 transition-all mr-1.5"
                             title="Ver Ficha Universal do Pedido"
                           >
                             <Eye className="w-3.5 h-3.5" />
@@ -504,7 +504,7 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
                           </button>
                           <button
                             onClick={() => handleOpenInspection(batch)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm transition-all"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg text-white bg-indigo-600 hover:bg-indigo-500 shadow-sm transition-all"
                           >
                             <ShieldCheck className="w-3.5 h-3.5" />
                             Inspecionar Lote
@@ -524,36 +524,36 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
       {activeSubTab === "indicators" && (
         <div className="space-y-6">
           {/* Filtros de Período */}
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-4">
+          <div className="bg-slate-900 p-4 rounded-2xl border border-slate-800 shadow-xl flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3 flex-wrap">
-              <div className="flex items-center gap-2 text-xs font-medium text-slate-600">
-                <Calendar className="w-4 h-4 text-indigo-600" />
+              <div className="flex items-center gap-2 text-xs font-medium text-slate-300">
+                <Calendar className="w-4 h-4 text-indigo-400" />
                 <span>Período de Inspeção:</span>
               </div>
               <input
                 type="date"
                 value={filterFrom}
                 onChange={(e) => setFilterFrom(e.target.value)}
-                className="px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                className="px-2.5 py-1.5 text-xs bg-slate-950 border border-slate-700 text-white rounded-lg focus:border-indigo-500 focus:outline-none"
               />
               <span className="text-xs text-slate-400">até</span>
               <input
                 type="date"
                 value={filterTo}
                 onChange={(e) => setFilterTo(e.target.value)}
-                className="px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                className="px-2.5 py-1.5 text-xs bg-slate-950 border border-slate-700 text-white rounded-lg focus:border-indigo-500 focus:outline-none"
               />
               <button
                 onClick={loadDefectReport}
                 disabled={loadingReport}
-                className="px-3 py-1.5 text-xs font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
+                className="px-3 py-1.5 text-xs font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-500 transition-colors"
               >
                 Filtrar
               </button>
               {(filterFrom || filterTo) && (
                 <button
                   onClick={() => { setFilterFrom(""); setFilterTo(""); setTimeout(loadDefectReport, 50); }}
-                  className="px-2.5 py-1.5 text-xs text-slate-500 hover:text-slate-800"
+                  className="px-2.5 py-1.5 text-xs text-slate-400 hover:text-white"
                 >
                   Limpar
                 </button>
@@ -562,7 +562,7 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
             <button
               onClick={loadDefectReport}
               disabled={loadingReport}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-slate-300 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors border border-slate-700"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loadingReport ? "animate-spin" : ""}`} />
               Recarregar Relatório
@@ -572,25 +572,25 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
           {/* Cards de Resumo Consolidado */}
           {defectReport && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-              <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                <div className="text-xs font-medium text-slate-500">Inspeções Realizadas</div>
-                <div className="text-2xl font-bold text-slate-800 mt-1">{defectReport.summary.totalInspections}</div>
+              <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow-xl">
+                <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Inspeções Realizadas</div>
+                <div className="text-2xl font-bold text-white mt-1">{defectReport.summary.totalInspections}</div>
               </div>
-              <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                <div className="text-xs font-medium text-slate-500">Peças Inspecionadas</div>
-                <div className="text-2xl font-bold text-slate-800 mt-1">{defectReport.summary.totalInspected}</div>
+              <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow-xl">
+                <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Peças Inspecionadas</div>
+                <div className="text-2xl font-bold text-white mt-1">{defectReport.summary.totalInspected}</div>
               </div>
-              <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                <div className="text-xs font-medium text-slate-500">Peças Aprovadas</div>
-                <div className="text-2xl font-bold text-emerald-600 mt-1">{defectReport.summary.totalApproved}</div>
+              <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow-xl">
+                <div className="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider">Peças Aprovadas</div>
+                <div className="text-2xl font-bold text-emerald-300 mt-1">{defectReport.summary.totalApproved}</div>
               </div>
-              <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                <div className="text-xs font-medium text-slate-500">Peças Defeituosas</div>
-                <div className="text-2xl font-bold text-rose-600 mt-1">{defectReport.summary.totalDefective}</div>
+              <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow-xl">
+                <div className="text-[11px] font-semibold text-rose-400 uppercase tracking-wider">Peças Defeituosas</div>
+                <div className="text-2xl font-bold text-rose-300 mt-1">{defectReport.summary.totalDefective}</div>
               </div>
-              <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                <div className="text-xs font-medium text-slate-500">Taxa Geral de Defeito</div>
-                <div className={`text-2xl font-bold mt-1 ${defectReport.summary.defectRate > 5 ? "text-rose-600" : "text-emerald-600"}`}>
+              <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow-xl">
+                <div className="text-[11px] font-semibold text-indigo-400 uppercase tracking-wider">Taxa Geral de Defeito</div>
+                <div className={`text-2xl font-bold mt-1 ${defectReport.summary.defectRate > 5 ? "text-rose-400" : "text-emerald-400"}`}>
                   {defectReport.summary.defectRate}%
                 </div>
               </div>
@@ -598,26 +598,26 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
           )}
 
           {/* Tabela de Oficinas */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="p-4 border-b border-slate-200">
-              <h3 className="font-semibold text-slate-800">Desempenho e Defeitos por Oficina de Costura</h3>
+          <div className="bg-slate-900 rounded-2xl shadow-xl border border-slate-800 overflow-hidden">
+            <div className="p-4 border-b border-slate-800">
+              <h3 className="font-semibold text-white">Desempenho e Defeitos por Oficina de Costura</h3>
             </div>
 
             {loadingReport ? (
-              <div className="p-12 text-center text-slate-500">
-                <RefreshCw className="w-8 h-8 animate-spin mx-auto text-indigo-600 mb-2" />
+              <div className="p-12 text-center text-slate-400">
+                <RefreshCw className="w-8 h-8 animate-spin mx-auto text-indigo-400 mb-2" />
                 Computando indicadores de qualidade...
               </div>
             ) : !defectReport || defectReport.workshops.length === 0 ? (
               <div className="p-12 text-center text-slate-500">
-                <Info className="w-10 h-10 text-slate-400 mx-auto mb-2" />
-                Nenhum dado de inspeção encontrado para o período selecionado.
+                <Info className="w-10 h-10 text-slate-600 mx-auto mb-2" />
+                <p className="text-slate-400">Nenhum dado de inspeção encontrado para o período selecionado.</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-sm">
                   <thead>
-                    <tr className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600">
+                    <tr className="bg-slate-950 border-b border-slate-800 text-xs font-semibold text-slate-400">
                       <th className="py-3 px-4">Oficina / Célula</th>
                       <th className="py-3 px-4 text-center">Tipo</th>
                       <th className="py-3 px-4 text-center">Inspecionadas</th>
@@ -627,28 +627,28 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
                       <th className="py-3 px-4">Principais Defeitos Apontados</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-slate-800/60">
                     {defectReport.workshops.map((w, idx) => (
-                      <tr key={idx} className="hover:bg-slate-50/70">
-                        <td className="py-3 px-4 font-semibold text-slate-800">
+                      <tr key={idx} className="hover:bg-slate-800/40 text-slate-200">
+                        <td className="py-3 px-4 font-semibold text-white">
                           {w.partnerName}
                         </td>
                         <td className="py-3 px-4 text-center">
                           <span className={`px-2 py-0.5 text-xs rounded font-medium ${
-                            w.partnerType === "INTERNAL" ? "bg-blue-50 text-blue-700" : "bg-purple-50 text-purple-700"
+                            w.partnerType === "INTERNAL" ? "bg-blue-500/20 text-blue-300 border border-blue-500/30" : "bg-purple-500/20 text-purple-300 border border-purple-500/30"
                           }`}>
                             {w.partnerType === "INTERNAL" ? "Interna" : "Externa"}
                           </span>
                         </td>
-                        <td className="py-3 px-4 text-center font-medium text-slate-700">{w.totalInspected}</td>
-                        <td className="py-3 px-4 text-center font-medium text-emerald-600">{w.totalApproved}</td>
-                        <td className="py-3 px-4 text-center font-medium text-rose-600">{w.totalDefective}</td>
+                        <td className="py-3 px-4 text-center font-medium text-slate-300">{w.totalInspected}</td>
+                        <td className="py-3 px-4 text-center font-medium text-emerald-400">{w.totalApproved}</td>
+                        <td className="py-3 px-4 text-center font-medium text-rose-400">{w.totalDefective}</td>
                         <td className="py-3 px-4 text-center">
                           <div className="inline-flex items-center gap-1.5">
-                            <span className={`font-bold ${w.defectRate > 5 ? "text-rose-600" : "text-emerald-600"}`}>
+                            <span className={`font-bold ${w.defectRate > 5 ? "text-rose-400" : "text-emerald-400"}`}>
                               {w.defectRate}%
                             </span>
-                            <div className="w-16 bg-slate-200 h-2 rounded-full overflow-hidden">
+                            <div className="w-16 bg-slate-800 h-2 rounded-full overflow-hidden">
                               <div
                                 className={`h-full ${w.defectRate > 5 ? "bg-rose-500" : "bg-emerald-500"}`}
                                 style={{ width: `${Math.min(w.defectRate, 100)}%` }}
@@ -658,13 +658,13 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
                         </td>
                         <td className="py-3 px-4">
                           {w.topDefects.length === 0 ? (
-                            <span className="text-xs text-slate-400">Nenhum defeito</span>
+                            <span className="text-xs text-slate-500">Nenhum defeito</span>
                           ) : (
                             <div className="flex flex-wrap gap-1">
                               {w.topDefects.slice(0, 3).map((d, dIdx) => (
                                 <span
                                   key={dIdx}
-                                  className="px-2 py-0.5 bg-rose-50 border border-rose-100 text-rose-700 rounded text-xs"
+                                  className="px-2 py-0.5 bg-rose-500/10 border border-rose-500/30 text-rose-300 rounded text-xs"
                                 >
                                   {d.name}: {d.count} pçs
                                 </span>
@@ -685,16 +685,16 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
       {/* SUB-ABA 3: TIPOS DE DEFEITO */}
       {activeSubTab === "defectTypes" && (
         <div className="space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="p-4 border-b border-slate-200 flex items-center justify-between">
+          <div className="bg-slate-900 rounded-2xl shadow-xl border border-slate-800 overflow-hidden">
+            <div className="p-4 border-b border-slate-800 flex items-center justify-between">
               <div>
-                <h3 className="font-semibold text-slate-800">Catálogo de Tipos de Defeito</h3>
-                <p className="text-xs text-slate-500">Tipos de anomalias padronizados para apontamento na inspeção.</p>
+                <h3 className="font-semibold text-white">Catálogo de Tipos de Defeito</h3>
+                <p className="text-xs text-slate-400">Tipos de anomalias padronizados para apontamento na inspeção.</p>
               </div>
               {isGestorOrAdmin && (
                 <button
                   onClick={() => setIsNewTypeModalOpen(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm transition-all"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg text-white bg-indigo-600 hover:bg-indigo-500 shadow-sm transition-all"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   Novo Tipo de Defeito
@@ -703,8 +703,8 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
             </div>
 
             {loadingTypes ? (
-              <div className="p-12 text-center text-slate-500">
-                <RefreshCw className="w-8 h-8 animate-spin mx-auto text-indigo-600 mb-2" />
+              <div className="p-12 text-center text-slate-400">
+                <RefreshCw className="w-8 h-8 animate-spin mx-auto text-indigo-400 mb-2" />
                 Carregando tipos de defeito...
               </div>
             ) : defectTypes.length === 0 ? (
@@ -715,21 +715,21 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-sm">
                   <thead>
-                    <tr className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600">
+                    <tr className="bg-slate-950 border-b border-slate-800 text-xs font-semibold text-slate-400">
                       <th className="py-3 px-4">Código</th>
                       <th className="py-3 px-4">Descrição do Defeito</th>
                       <th className="py-3 px-4 text-center">Status</th>
                       <th className="py-3 px-4 text-right">Ação</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-slate-800/60">
                     {defectTypes.map((dt) => (
-                      <tr key={dt.id} className="hover:bg-slate-50/70">
-                        <td className="py-3 px-4 font-mono font-bold text-xs text-slate-700">{dt.code}</td>
-                        <td className="py-3 px-4 text-slate-800">{dt.name}</td>
+                      <tr key={dt.id} className="hover:bg-slate-800/40 text-slate-200">
+                        <td className="py-3 px-4 font-mono font-bold text-xs text-indigo-300">{dt.code}</td>
+                        <td className="py-3 px-4 text-white font-medium">{dt.name}</td>
                         <td className="py-3 px-4 text-center">
                           <span className={`px-2 py-0.5 text-xs rounded font-medium ${
-                            dt.isActive ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-slate-500"
+                            dt.isActive ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" : "bg-slate-800 text-slate-400 border border-slate-700"
                           }`}>
                             {dt.isActive ? "Ativo" : "Inativo"}
                           </span>
@@ -740,8 +740,8 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
                               onClick={() => handleToggleDefectType(dt.id)}
                               className={`px-2.5 py-1 text-xs font-medium rounded transition-colors ${
                                 dt.isActive
-                                  ? "text-rose-600 hover:bg-rose-50"
-                                  : "text-emerald-600 hover:bg-emerald-50"
+                                  ? "text-rose-400 hover:bg-rose-500/10 border border-rose-500/20"
+                                  : "text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/20"
                               }`}
                             >
                               {dt.isActive ? "Desativar" : "Ativar"}
@@ -760,21 +760,21 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
 
       {/* MODAL DE INSPEÇÃO DE QUALIDADE */}
       {isInspectionModalOpen && selectedBatch && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-2xl w-full p-6 my-8 animate-in fade-in zoom-in-95">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-200">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-slate-900 rounded-2xl shadow-2xl border border-slate-800 max-w-2xl w-full p-6 my-8 text-white">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-6 h-6 text-indigo-600" />
+                <ShieldCheck className="w-6 h-6 text-indigo-400" />
                 <div>
-                  <h3 className="font-bold text-slate-800">Inspeção de Qualidade — Lote {selectedBatch.batchNumber}</h3>
-                  <p className="text-xs text-slate-500">
-                    OP: {selectedBatch.productionOrder?.opNumber} • Total do Lote: <strong>{selectedBatch.quantity} peças</strong>
+                  <h3 className="font-bold text-white text-lg">Inspeção de Qualidade — Lote {selectedBatch.batchNumber}</h3>
+                  <p className="text-xs text-slate-400">
+                    OP: {selectedBatch.productionOrder?.opNumber} • Total do Lote: <strong className="text-white">{selectedBatch.quantity} peças</strong>
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setIsInspectionModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 text-xl font-bold"
+                className="text-slate-400 hover:text-white text-xl font-bold"
               >
                 ×
               </button>
@@ -783,22 +783,22 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
             <form onSubmit={handleSubmitInspection} className="mt-4 space-y-4">
               {/* Escolha da Decisão de Inspeção */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-2">Decisão de Inspeção:</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-2">Decisão de Inspeção:</label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <button
                     type="button"
                     onClick={() => handleResultChange("APPROVED_TOTAL")}
                     className={`p-3 rounded-xl border text-left flex flex-col justify-between transition-all ${
                       inspectionResult === "APPROVED_TOTAL"
-                        ? "border-emerald-500 bg-emerald-50/50 ring-2 ring-emerald-500/20"
-                        : "border-slate-200 hover:border-slate-300"
+                        ? "border-emerald-500/50 bg-emerald-500/10 ring-2 ring-emerald-500/20"
+                        : "border-slate-800 bg-slate-950 hover:border-slate-700"
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-emerald-700">Aprovação Total</span>
-                      {inspectionResult === "APPROVED_TOTAL" && <Check className="w-4 h-4 text-emerald-600" />}
+                      <span className="text-xs font-bold text-emerald-400">Aprovação Total</span>
+                      {inspectionResult === "APPROVED_TOTAL" && <Check className="w-4 h-4 text-emerald-400" />}
                     </div>
-                    <p className="text-[11px] text-slate-500 mt-1">100% aprovado para Expedição</p>
+                    <p className="text-[11px] text-slate-400 mt-1">100% aprovado para Expedição</p>
                   </button>
 
                   <button
@@ -806,15 +806,15 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
                     onClick={() => handleResultChange("APPROVED_PARTIAL")}
                     className={`p-3 rounded-xl border text-left flex flex-col justify-between transition-all ${
                       inspectionResult === "APPROVED_PARTIAL"
-                        ? "border-amber-500 bg-amber-50/50 ring-2 ring-amber-500/20"
-                        : "border-slate-200 hover:border-slate-300"
+                        ? "border-amber-500/50 bg-amber-500/10 ring-2 ring-amber-500/20"
+                        : "border-slate-800 bg-slate-950 hover:border-slate-700"
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-amber-700">Aprovação Parcial</span>
-                      {inspectionResult === "APPROVED_PARTIAL" && <Check className="w-4 h-4 text-amber-600" />}
+                      <span className="text-xs font-bold text-amber-400">Aprovação Parcial</span>
+                      {inspectionResult === "APPROVED_PARTIAL" && <Check className="w-4 h-4 text-amber-400" />}
                     </div>
-                    <p className="text-[11px] text-slate-500 mt-1">Fraciona aprovadas e retrabalho</p>
+                    <p className="text-[11px] text-slate-400 mt-1">Fraciona aprovadas e retrabalho</p>
                   </button>
 
                   <button
@@ -822,23 +822,23 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
                     onClick={() => handleResultChange("REJECTED_TOTAL")}
                     className={`p-3 rounded-xl border text-left flex flex-col justify-between transition-all ${
                       inspectionResult === "REJECTED_TOTAL"
-                        ? "border-rose-500 bg-rose-50/50 ring-2 ring-rose-500/20"
-                        : "border-slate-200 hover:border-slate-300"
+                        ? "border-rose-500/50 bg-rose-500/10 ring-2 ring-rose-500/20"
+                        : "border-slate-800 bg-slate-950 hover:border-slate-700"
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-rose-700">Reprovação Total</span>
-                      {inspectionResult === "REJECTED_TOTAL" && <Check className="w-4 h-4 text-rose-600" />}
+                      <span className="text-xs font-bold text-rose-400">Reprovação Total</span>
+                      {inspectionResult === "REJECTED_TOTAL" && <Check className="w-4 h-4 text-rose-400" />}
                     </div>
-                    <p className="text-[11px] text-slate-500 mt-1">Retorna lote inteiro</p>
+                    <p className="text-[11px] text-slate-400 mt-1">Retorna lote inteiro</p>
                   </button>
                 </div>
               </div>
 
               {/* Contagem de Peças Aprovadas e Defeituosas */}
-              <div className="grid grid-cols-2 gap-4 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+              <div className="grid grid-cols-2 gap-4 bg-slate-950 p-3.5 rounded-xl border border-slate-800">
                 <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1">Peças Aprovadas (OK):</label>
+                  <label className="block text-xs font-medium text-slate-400 mb-1">Peças Aprovadas (OK):</label>
                   <input
                     type="number"
                     min="0"
@@ -850,11 +850,11 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
                       setTotalApproved(val);
                       setTotalDefective(selectedBatch.quantity - val);
                     }}
-                    className="w-full px-3 py-2 text-sm font-bold text-emerald-700 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 disabled:bg-slate-100"
+                    className="w-full px-3 py-2 text-sm font-bold text-emerald-400 bg-slate-900 border border-slate-700 rounded-lg focus:border-emerald-500 focus:outline-none disabled:bg-slate-950 disabled:text-emerald-400/60"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1">Peças com Defeito:</label>
+                  <label className="block text-xs font-medium text-slate-400 mb-1">Peças com Defeito:</label>
                   <input
                     type="number"
                     min="0"
@@ -866,17 +866,17 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
                       setTotalDefective(val);
                       setTotalApproved(selectedBatch.quantity - val);
                     }}
-                    className="w-full px-3 py-2 text-sm font-bold text-rose-700 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 disabled:bg-slate-100"
+                    className="w-full px-3 py-2 text-sm font-bold text-rose-400 bg-slate-900 border border-slate-700 rounded-lg focus:border-rose-500 focus:outline-none disabled:bg-slate-950 disabled:text-rose-400/60"
                   />
                 </div>
-                <div className="col-span-2 flex items-center justify-between text-xs text-slate-500">
-                  <span>Soma atual: <strong>{totalApproved + totalDefective}</strong> / {selectedBatch.quantity} peças</span>
+                <div className="col-span-2 flex items-center justify-between text-xs text-slate-400">
+                  <span>Soma atual: <strong className="text-white">{totalApproved + totalDefective}</strong> / {selectedBatch.quantity} peças</span>
                   {totalApproved + totalDefective === selectedBatch.quantity ? (
-                    <span className="text-emerald-600 font-semibold flex items-center gap-1">
+                    <span className="text-emerald-400 font-semibold flex items-center gap-1">
                       <CheckCircle2 className="w-3.5 h-3.5" /> Soma coerente
                     </span>
                   ) : (
-                    <span className="text-rose-600 font-semibold flex items-center gap-1">
+                    <span className="text-rose-400 font-semibold flex items-center gap-1">
                       <AlertTriangle className="w-3.5 h-3.5" /> Divergência na soma
                     </span>
                   )}
@@ -885,12 +885,12 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
 
               {/* Apontamento de Defeitos (se houver peças com defeito) */}
               {totalDefective > 0 && (
-                <div className="p-4 bg-rose-50/60 rounded-xl border border-rose-200 space-y-3">
+                <div className="p-4 bg-rose-500/10 rounded-xl border border-rose-500/20 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-rose-800 uppercase tracking-wide">
+                    <span className="text-xs font-bold text-rose-300 uppercase tracking-wide">
                       Checklist de Defeitos por Tamanho
                     </span>
-                    <span className={`text-xs font-semibold ${sumDefectEntries === totalDefective ? "text-emerald-700" : "text-rose-700"}`}>
+                    <span className={`text-xs font-semibold ${sumDefectEntries === totalDefective ? "text-emerald-400" : "text-rose-400"}`}>
                       Apontados: {sumDefectEntries} / {totalDefective} peças
                     </span>
                   </div>
@@ -901,10 +901,10 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
                       <select
                         value={currentDefectTypeId}
                         onChange={(e) => setCurrentDefectTypeId(e.target.value)}
-                        className="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-300 rounded-lg"
+                        className="w-full px-2.5 py-1.5 text-xs bg-slate-950 border border-slate-700 text-white rounded-lg focus:border-rose-500 focus:outline-none"
                       >
                         {defectTypes.filter((dt) => dt.isActive).map((dt) => (
-                          <option key={dt.id} value={dt.id}>
+                          <option key={dt.id} value={dt.id} className="bg-slate-900 text-white">
                             {dt.name} ({dt.code})
                           </option>
                         ))}
@@ -914,10 +914,10 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
                       <select
                         value={currentDefectSize}
                         onChange={(e) => setCurrentDefectSize(e.target.value)}
-                        className="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-300 rounded-lg"
+                        className="w-full px-2.5 py-1.5 text-xs bg-slate-950 border border-slate-700 text-white rounded-lg focus:border-rose-500 focus:outline-none"
                       >
                         {["PP", "P", "M", "G", "GG", "XG", "U"].map((sz) => (
-                          <option key={sz} value={sz}>Tam {sz}</option>
+                          <option key={sz} value={sz} className="bg-slate-900 text-white">Tam {sz}</option>
                         ))}
                       </select>
                     </div>
@@ -927,12 +927,12 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
                         min="1"
                         value={currentDefectQty}
                         onChange={(e) => setCurrentDefectQty(Math.max(1, Number(e.target.value)))}
-                        className="w-16 px-2 py-1.5 text-xs bg-white border border-slate-300 rounded-lg font-bold"
+                        className="w-16 px-2 py-1.5 text-xs bg-slate-950 border border-slate-700 text-white rounded-lg font-bold text-center focus:border-rose-500 focus:outline-none"
                       />
                       <button
                         type="button"
                         onClick={handleAddDefect}
-                        className="flex-1 px-2.5 py-1.5 text-xs font-semibold bg-rose-600 text-white rounded-lg hover:bg-rose-700 transition-colors"
+                        className="flex-1 px-2.5 py-1.5 text-xs font-semibold bg-rose-600 text-white rounded-lg hover:bg-rose-500 transition-colors shadow-sm"
                       >
                         + Adicionar
                       </button>
@@ -947,15 +947,15 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
                         return (
                           <div
                             key={def.id}
-                            className="flex items-center justify-between bg-white px-3 py-1.5 rounded-lg border border-rose-200 text-xs"
+                            className="flex items-center justify-between bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800 text-xs"
                           >
-                            <span className="text-slate-800">
-                              <strong>{typeObj?.name || "Defeito"}</strong> — Tam {def.size}: <strong>{def.quantity} pçs</strong>
+                            <span className="text-slate-300">
+                              <strong className="text-white">{typeObj?.name || "Defeito"}</strong> — Tam {def.size}: <strong className="text-rose-400">{def.quantity} pçs</strong>
                             </span>
                             <button
                               type="button"
                               onClick={() => handleRemoveDefect(def.id)}
-                              className="text-rose-500 hover:text-rose-700 font-bold px-1"
+                              className="text-rose-400 hover:text-rose-300 font-bold px-1"
                             >
                               ×
                             </button>
@@ -968,31 +968,31 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
                   {/* Seletor de Setor de Retrabalho */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                     <div>
-                      <label className="block text-xs font-medium text-slate-700 mb-1">Setor de Retrabalho:</label>
+                      <label className="block text-xs font-medium text-slate-300 mb-1">Setor de Retrabalho:</label>
                       <select
                         value={reworkTargetSector}
                         onChange={(e) => setReworkTargetSector(e.target.value)}
-                        className="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-300 rounded-lg font-medium"
+                        className="w-full px-2.5 py-1.5 text-xs bg-slate-950 border border-slate-700 text-white rounded-lg font-medium focus:border-rose-500 focus:outline-none"
                       >
-                        <option value="COSTURA">12. Costura (Padrão)</option>
-                        <option value="DESPACHE_OFICINA">11. Despache para Oficina</option>
-                        <option value="SEPARACAO">10. Separação</option>
-                        <option value="CALANDRA">09. Calandra</option>
-                        <option value="INFESTO">08. Infesto</option>
-                        <option value="IMPRESSAO">07. Impressão</option>
-                        <option value="DIAGRAMACAO">06. Diagramação</option>
-                        <option value="PRE_DIAGRAMACAO">05. Pré-Diagramação</option>
+                        <option value="COSTURA" className="bg-slate-900 text-white">12. Costura (Padrão)</option>
+                        <option value="DESPACHE_OFICINA" className="bg-slate-900 text-white">11. Despache para Oficina</option>
+                        <option value="SEPARACAO" className="bg-slate-900 text-white">10. Separação</option>
+                        <option value="CALANDRA" className="bg-slate-900 text-white">09. Calandra</option>
+                        <option value="INFESTO" className="bg-slate-900 text-white">08. Infesto</option>
+                        <option value="IMPRESSAO" className="bg-slate-900 text-white">07. Impressão</option>
+                        <option value="DIAGRAMACAO" className="bg-slate-900 text-white">06. Diagramação</option>
+                        <option value="PRE_DIAGRAMACAO" className="bg-slate-900 text-white">05. Pré-Diagramação</option>
                       </select>
                     </div>
 
                     <div>
-                      <label className="block text-xs font-medium text-slate-700 mb-1">Justificativa do Retrabalho:</label>
+                      <label className="block text-xs font-medium text-slate-300 mb-1">Justificativa do Retrabalho:</label>
                       <input
                         type="text"
                         placeholder="Ex: Refazer costura torta na barra..."
                         value={reworkReason}
                         onChange={(e) => setReworkReason(e.target.value)}
-                        className="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-300 rounded-lg"
+                        className="w-full px-2.5 py-1.5 text-xs bg-slate-950 border border-slate-700 text-white rounded-lg focus:border-rose-500 focus:outline-none"
                       />
                     </div>
                   </div>
@@ -1001,19 +1001,19 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
 
               {/* Observações Gerais */}
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">Observações da Inspeção (Opcional):</label>
+                <label className="block text-xs font-medium text-slate-300 mb-1">Observações da Inspeção (Opcional):</label>
                 <textarea
                   rows={2}
                   placeholder="Informações técnicas adicionais observadas na inspeção..."
                   value={inspectionNotes}
                   onChange={(e) => setInspectionNotes(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg"
+                  className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 text-white rounded-lg focus:border-indigo-500 focus:outline-none"
                 />
               </div>
 
               {/* PIN de Assinatura Digital HMAC */}
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
-                <label className="block text-xs font-semibold text-slate-800 mb-1">
+              <div className="p-3 bg-slate-950 rounded-xl border border-slate-800">
+                <label className="block text-xs font-semibold text-slate-200 mb-1">
                   PIN de Assinatura Digital do Inspetor:
                 </label>
                 <input
@@ -1022,27 +1022,27 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
                   placeholder="PIN de 4 a 6 dígitos"
                   value={inspectionPin}
                   onChange={(e) => setInspectionPin(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg tracking-widest focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 text-sm bg-slate-900 border border-slate-700 text-white rounded-lg tracking-widest text-center focus:border-indigo-500 focus:outline-none"
                 />
-                <p className="text-[11px] text-slate-500 mt-1">
+                <p className="text-[11px] text-slate-400 mt-1">
                   Gera assinatura digital criptografada HMAC-SHA-256 e registra auditoria imutável.
                 </p>
               </div>
 
               {/* Ações */}
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
                 <button
                   type="button"
                   onClick={() => setIsInspectionModalOpen(false)}
                   disabled={isSubmittingInspection}
-                  className="px-4 py-2 text-xs font-medium text-slate-600 hover:text-slate-800"
+                  className="px-4 py-2 text-xs font-medium text-slate-400 hover:text-white transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingInspection}
-                  className="px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition-all flex items-center gap-1.5"
+                  className="px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg shadow-sm transition-all flex items-center gap-1.5"
                 >
                   {isSubmittingInspection ? (
                     <>
@@ -1064,49 +1064,49 @@ export function Sector13QualidadePanel({ currentUser }: Sector13QualidadePanelPr
 
       {/* MODAL DE NOVO TIPO DE DEFEITO (ADMIN/GESTOR) */}
       {isNewTypeModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-md w-full p-6 animate-in fade-in zoom-in-95">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
-              <h3 className="font-bold text-slate-800">Cadastrar Novo Tipo de Defeito</h3>
-              <button onClick={() => setIsNewTypeModalOpen(false)} className="text-slate-400 hover:text-slate-600 text-xl font-bold">×</button>
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 rounded-2xl shadow-xl border border-slate-800 max-w-md w-full p-6 text-white animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <h3 className="font-bold text-white">Cadastrar Novo Tipo de Defeito</h3>
+              <button onClick={() => setIsNewTypeModalOpen(false)} className="text-slate-400 hover:text-white text-xl font-bold">×</button>
             </div>
 
             <form onSubmit={handleCreateDefectType} className="mt-4 space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Código (Identificador Único):</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Código (Identificador Único):</label>
                 <input
                   type="text"
                   placeholder="Ex: BOTAO_SOLTO, ZIPER_DEFEITUOSO"
                   value={newTypeCode}
                   onChange={(e) => setNewTypeCode(e.target.value.toUpperCase())}
-                  className="w-full px-3 py-2 text-xs font-mono border border-slate-300 rounded-lg uppercase"
+                  className="w-full px-3 py-2 text-xs font-mono bg-slate-950 border border-slate-700 text-white rounded-lg uppercase focus:border-indigo-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Descrição do Defeito:</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Descrição do Defeito:</label>
                 <input
                   type="text"
                   placeholder="Ex: Botão solto ou frouxo na gola polo"
                   value={newTypeName}
                   onChange={(e) => setNewTypeName(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg"
+                  className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 text-white rounded-lg focus:border-indigo-500 focus:outline-none"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
                 <button
                   type="button"
                   onClick={() => setIsNewTypeModalOpen(false)}
                   disabled={isSubmittingType}
-                  className="px-4 py-2 text-xs text-slate-600"
+                  className="px-4 py-2 text-xs text-slate-400 hover:text-white transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingType || !newTypeCode.trim() || !newTypeName.trim()}
-                  className="px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm"
+                  className="px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg shadow-sm transition-all"
                 >
                   {isSubmittingType ? "Cadastrando..." : "Cadastrar Tipo de Defeito"}
                 </button>

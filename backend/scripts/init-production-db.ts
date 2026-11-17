@@ -40,6 +40,168 @@ const DEFECT_TYPES_REFERENCE = [
   { code: "MEDIDA_FORA_TOLERANCIA", name: "Medida fora da tabela de medidas" },
 ];
 
+const OFFICIAL_CATEGORIES_REFERENCE = [
+  { code: "FUTEBOL", name: "Futebol & Futsal", description: "Uniformes para futebol de campo, futsal e society" },
+  { code: "VOLEI", name: "Vôlei", description: "Uniformes para quadra e vôlei de praia" },
+  { code: "BASQUETE", name: "Basquete", description: "Regatas e uniformes de basquete e streetball" },
+  { code: "CORRIDA_FITNESS", name: "Corrida & Treino", description: "Vestuário para corrida, ciclismo e academias" },
+  { code: "CORPORATIVO", name: "Corporativo & Eventos", description: "Camisas polo, agasalhos e uniformes empresariais" },
+];
+
+const OFFICIAL_PRODUCTS_REFERENCE = [
+  {
+    categoryCode: "FUTEBOL",
+    code: "CAMISA_CLASSIC",
+    name: "Camisa Classic Dry Fit",
+    description: "Camisa esportiva tradicional em tecido Dry Fit respirável, escudo sublimado, gola redonda ou V.",
+    minQuantity: 10,
+    basePrice: 42.9,
+    availableFabrics: JSON.stringify(["Dry Fit Tradicional", "Cacharrel Dry"]),
+    availableCollars: JSON.stringify(["Gola Redonda", "Gola V"]),
+    availableCustomizations: JSON.stringify([
+      { code: "NOME", name: "Nome Individual", price: 5.0 },
+      { code: "NUMERO", name: "Número Individual", price: 5.0 },
+      { code: "TPU_3D", name: "Escudo TPU 3D", price: 15.0 },
+      { code: "MANGA_LONGA", name: "Manga Longa", price: 12.0 },
+    ]),
+  },
+  {
+    categoryCode: "FUTEBOL",
+    code: "CAMISA_PRIME",
+    name: "Camisa Prime Dry Fit",
+    description: "Camisa esportiva linha Prime em poliéster Dry Fit de alta durabilidade e secagem ultra-rápida.",
+    minQuantity: 10,
+    basePrice: 49.9,
+    availableFabrics: JSON.stringify(["Dry Fit Tradicional", "Dry Texturizado"]),
+    availableCollars: JSON.stringify(["Gola V", "Gola Redonda"]),
+    availableCustomizations: JSON.stringify([
+      { code: "NOME", name: "Nome Individual", price: 5.0 },
+      { code: "NUMERO", name: "Número Individual", price: 5.0 },
+      { code: "TPU_3D", name: "Escudo TPU 3D", price: 15.0 },
+      { code: "MANGA_LONGA", name: "Manga Longa", price: 12.0 },
+    ]),
+  },
+  {
+    categoryCode: "FUTEBOL",
+    code: "CAMISA_RAGLAN_V",
+    name: "Camisa Raglan Gola V",
+    description: "Modelagem anatômica com corte raglan nos ombros, tecido Dry Texturizado com microfuros.",
+    minQuantity: 10,
+    basePrice: 54.9,
+    availableFabrics: JSON.stringify(["Dry Texturizado", "Poliéster c/ Elastano"]),
+    availableCollars: JSON.stringify(["Gola V com detalhe em ribana"]),
+    availableCustomizations: JSON.stringify([
+      { code: "NOME", name: "Nome Individual", price: 5.0 },
+      { code: "NUMERO", name: "Número Individual", price: 5.0 },
+      { code: "TPU_3D", name: "Escudo TPU 3D", price: 15.0 },
+    ]),
+  },
+  {
+    categoryCode: "FUTEBOL",
+    code: "CAMISA_VARSITY",
+    name: "Camisa Varsity Esportiva",
+    description: "Linha Varsity com gola e punhos em colmeia ribana especial, estampa total sublimada.",
+    minQuantity: 10,
+    basePrice: 59.9,
+    availableFabrics: JSON.stringify(["Dry Texturizado", "Dry Sport Favo"]),
+    availableCollars: JSON.stringify(["Gola V Bicolor em Ribana", "Gola Redonda Ribana"]),
+    availableCustomizations: JSON.stringify([
+      { code: "NOME", name: "Nome Individual", price: 5.0 },
+      { code: "NUMERO", name: "Número Individual", price: 5.0 },
+      { code: "TPU_3D", name: "Escudo TPU 3D", price: 15.0 },
+    ]),
+  },
+  {
+    categoryCode: "CORPORATIVO",
+    code: "CAMISA_POLO_DRY",
+    name: "Camisa Polo Dry Sport Favo",
+    description: "Camisa estilo polo em tecido Dry Sport Favo com vista embutida, botões e gola estruturada.",
+    minQuantity: 10,
+    basePrice: 68.9,
+    availableFabrics: JSON.stringify(["Dry Sport Favo", "Piqué Poliéster"]),
+    availableCollars: JSON.stringify(["Gola Polo Estruturada"]),
+    availableCustomizations: JSON.stringify([
+      { code: "NOME", name: "Nome Bordado / Estampado", price: 5.0 },
+      { code: "TPU_3D", name: "Escudo / Logo TPU 3D", price: 15.0 },
+    ]),
+  },
+  {
+    categoryCode: "FUTEBOL",
+    code: "CALCAO_JOGO",
+    name: "Calção de Jogo Esportivo",
+    description: "Calção esportivo anatômico em tecido Dry Fit reforçado com cordão interno e elástico largo.",
+    minQuantity: 10,
+    basePrice: 34.9,
+    availableFabrics: JSON.stringify(["Dry Fit Tradicional", "Dry Texturizado"]),
+    availableCollars: JSON.stringify([]),
+    availableCustomizations: JSON.stringify([
+      { code: "NUMERO", name: "Número no Calção", price: 3.0 },
+      { code: "ESCUDO", name: "Escudo no Calção", price: 5.0 },
+    ]),
+  },
+  {
+    categoryCode: "BASQUETE",
+    code: "REGATA_CONFORT",
+    name: "Regata Confort Esportiva",
+    description: "Regata ultra-leve com cavas amplas para máxima liberdade de movimento e ventilação.",
+    minQuantity: 10,
+    basePrice: 38.9,
+    availableFabrics: JSON.stringify(["Dry Fit Tradicional", "Cacharrel Dry"]),
+    availableCollars: JSON.stringify(["Gola Careca", "Gola V"]),
+    availableCustomizations: JSON.stringify([
+      { code: "NOME", name: "Nome Individual", price: 5.0 },
+      { code: "NUMERO", name: "Número Frente e Costas", price: 8.0 },
+    ]),
+  },
+  {
+    categoryCode: "FUTEBOL",
+    code: "COLETE_TREINO",
+    name: "Colete de Treino Ventilado",
+    description: "Colete para treinamento esportivo com tecido microperfurado ultra-respirável.",
+    minQuantity: 10,
+    basePrice: 22.9,
+    availableFabrics: JSON.stringify(["Dry Fit Perfurado"]),
+    availableCollars: JSON.stringify(["Gola Redonda"]),
+    availableCustomizations: JSON.stringify([
+      { code: "NUMERO", name: "Número", price: 3.0 },
+    ]),
+  },
+  {
+    categoryCode: "CORPORATIVO",
+    code: "JAQUETA_AGASALHO",
+    name: "Jaqueta de Agasalho Esportivo",
+    description: "Jaqueta esportiva em helanca flanelada com zíper frontal tratorado, bolsos e punhos em ribana.",
+    minQuantity: 10,
+    basePrice: 119.9,
+    availableFabrics: JSON.stringify(["Helanca Flanelada", "Poliéster Microfibra"]),
+    availableCollars: JSON.stringify(["Gola Alta com Zíper"]),
+    availableCustomizations: JSON.stringify([
+      { code: "NOME", name: "Nome Individual", price: 6.0 },
+      { code: "TPU_3D", name: "Escudo TPU 3D", price: 15.0 },
+    ]),
+  },
+];
+
+const INITIAL_SEWING_PARTNERS_REFERENCE = [
+  {
+    type: "INTERNAL",
+    name: "Célula Interna de Costura (Fábrica Principal)",
+    contactPerson: "Encarregada de Costura",
+    phone: "(11) 98888-1234",
+    basePricePerPc: 0.0,
+    notes: "Linha de montagem interna para pedidos prioritários e pilotos.",
+  },
+  {
+    type: "EXTERNAL",
+    name: "Oficina Parceira Alpha Confecções",
+    contactPerson: "Dona Maria",
+    phone: "(11) 97777-5678",
+    documentNumber: "12.345.678/0001-90",
+    basePricePerPc: 7.5,
+    notes: "Oficina externa homologada para fechamento e acabamento.",
+  },
+];
+
 const SEED_TEST_DEFAULT_CREDENTIALS = [
   "admin@fabrica.com",
   "gestor@fabrica.com",
@@ -77,6 +239,9 @@ export async function initProductionDatabase(): Promise<{
   dbPath: string;
   sectorsCount: number;
   defectTypesCount: number;
+  categoriesCount: number;
+  productsCount: number;
+  partnersCount: number;
   usersCount: number;
   sha256: string;
   integrityCheck: string;
@@ -192,6 +357,9 @@ export async function initProductionDatabase(): Promise<{
 
   let sectorsCount = 0;
   let defectTypesCount = 0;
+  let categoriesCount = 0;
+  let productsCount = 0;
+  let partnersCount = 0;
   let usersCount = 0;
   let integrityCheck = "UNKNOWN";
 
@@ -231,6 +399,71 @@ export async function initProductionDatabase(): Promise<{
         });
       }
 
+      // Semeia as 5 Categorias Oficiais do Catálogo Labella Sports
+      for (const cat of OFFICIAL_CATEGORIES_REFERENCE) {
+        await tx.productCategory.upsert({
+          where: { code: cat.code },
+          update: { name: cat.name, description: cat.description, isActive: true },
+          create: { code: cat.code, name: cat.name, description: cat.description, isActive: true },
+        });
+      }
+
+      // Semeia os 9 Produtos Oficiais do Catálogo com Preços e Opcionais
+      for (const p of OFFICIAL_PRODUCTS_REFERENCE) {
+        const catRecord = await tx.productCategory.findUnique({
+          where: { code: p.categoryCode },
+        });
+        if (catRecord) {
+          await tx.catalogProduct.upsert({
+            where: { code: p.code },
+            update: {
+              name: p.name,
+              description: p.description,
+              categoryId: catRecord.id,
+              minQuantity: p.minQuantity,
+              basePrice: p.basePrice,
+              availableFabrics: p.availableFabrics,
+              availableCollars: p.availableCollars,
+              availableCustomizations: p.availableCustomizations,
+              isActive: true,
+            },
+            create: {
+              code: p.code,
+              name: p.name,
+              description: p.description,
+              categoryId: catRecord.id,
+              minQuantity: p.minQuantity,
+              basePrice: p.basePrice,
+              availableFabrics: p.availableFabrics,
+              availableCollars: p.availableCollars,
+              availableCustomizations: p.availableCustomizations,
+              isActive: true,
+            },
+          });
+        }
+      }
+
+      // Semeia Oficinas Iniciais de Costura
+      for (const sp of INITIAL_SEWING_PARTNERS_REFERENCE) {
+        const existing = await tx.sewingPartner.findFirst({
+          where: { name: sp.name },
+        });
+        if (!existing) {
+          await tx.sewingPartner.create({
+            data: {
+              type: sp.type,
+              name: sp.name,
+              contactPerson: sp.contactPerson,
+              phone: sp.phone,
+              documentNumber: sp.documentNumber,
+              basePricePerPc: sp.basePricePerPc,
+              notes: sp.notes,
+              isActive: true,
+            },
+          });
+        }
+      }
+
       // Cria UM único usuário ADMIN com Bcrypt 10 rounds
       const passwordHash = await bcrypt.hash(adminPassword, 10);
       const signaturePinHash = await bcrypt.hash(adminPin, 10);
@@ -258,6 +491,9 @@ export async function initProductionDatabase(): Promise<{
 
     sectorsCount = await prisma.sector.count();
     defectTypesCount = await prisma.defectType.count();
+    categoriesCount = await prisma.productCategory.count();
+    productsCount = await prisma.catalogProduct.count();
+    partnersCount = await prisma.sewingPartner.count();
     usersCount = await prisma.user.count();
 
     const integrityRaw: any[] = await prisma.$queryRawUnsafe("PRAGMA integrity_check;");
@@ -277,6 +513,9 @@ export async function initProductionDatabase(): Promise<{
     dbPath: normalizedDbPath,
     sectorsCount,
     defectTypesCount,
+    categoriesCount,
+    productsCount,
+    partnersCount,
     usersCount,
     sha256,
     integrityCheck,
@@ -296,6 +535,9 @@ if (
       console.log(`Caminho do Banco:        ${result.dbPath}`);
       console.log(`Setores Cadastrados:     ${result.sectorsCount} (14 oficiais)`);
       console.log(`Tipos de Defeito:        ${result.defectTypesCount} (6 oficiais)`);
+      console.log(`Categorias de Catálogo:  ${result.categoriesCount} (5 oficiais)`);
+      console.log(`Produtos do Catálogo:    ${result.productsCount} (9 oficiais)`);
+      console.log(`Oficinas Homologadas:    ${result.partnersCount}`);
       console.log(`Usuários Cadastrados:    ${result.usersCount} (1 ADMIN único)`);
       console.log(`SHA-256 do Banco:        ${result.sha256}`);
       console.log(`Integridade SQLite:      ${result.integrityCheck}`);

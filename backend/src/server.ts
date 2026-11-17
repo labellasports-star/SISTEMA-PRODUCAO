@@ -1,5 +1,7 @@
 import express from "express";
 import http from "http";
+import path from "path";
+import fs from "fs";
 import { Server as SocketIOServer } from "socket.io";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -147,6 +149,19 @@ io.on("connection", (socket) => {
 app.use(cors());
 app.use(express.json());
 
+// Detecção dinâmica de build estático do frontend (SPA) para produção / rede local
+const candidateDistDirs = [
+  path.resolve(process.cwd(), "frontend", "dist"),
+  path.resolve(process.cwd(), "..", "frontend", "dist"),
+];
+const frontendDistPath = candidateDistDirs.find((dir) =>
+  fs.existsSync(path.join(dir, "index.html"))
+);
+
+if (frontendDistPath) {
+  app.use(express.static(frontendDistPath));
+}
+
 // Request logger simples
 app.use((req, _res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
@@ -163,10 +178,11 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
-// Rota raiz amigável para evitar erro caso o usuário acesse a porta do backend (4000) no navegador
-app.get("/", (req, res) => {
-  if (req.accepts("html")) {
-    return res.send(`<!DOCTYPE html>
+// Rota raiz amigável quando o build do frontend não estiver presente
+if (!frontendDistPath) {
+  app.get("/", (req, res) => {
+    if (req.accepts("html")) {
+      return res.send(`<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -195,15 +211,16 @@ app.get("/", (req, res) => {
   </div>
 </body>
 </html>`);
-  }
-  res.json({
-    system: "PCP Industrial - Fábrica de Uniformes Labella Sports",
-    status: "online",
-    message: "Servidor backend operando normalmente na porta 4000.",
-    frontendUrl: "http://localhost:5173",
-    healthCheck: "/api/health",
+    }
+    res.json({
+      system: "PCP Industrial - Fábrica de Uniformes Labella Sports",
+      status: "online",
+      message: "Servidor backend operando normalmente na porta 4000.",
+      frontendUrl: "http://localhost:5173",
+      healthCheck: "/api/health",
+    });
   });
-});
+}
 
 app.get("/api", (_req, res) => {
   res.json({
@@ -244,13 +261,31 @@ app.use("/api/production", dispatchRouter);
 app.use("/api/production", costuraRouter);
 app.use("/api/production", qualityRouter);
 app.use("/api/production", expedicaoRouter);
-app.use("/api", batchesRouter);
 app.use("/api/dashboard", dashboardRouter);
 app.use("/api/universal-sheet", universalSheetRouter);
 app.use("/api/catalog", catalogRouter);
+app.use("/api", batchesRouter);
 
-// Tratamento de rotas inexistentes
+// Fallback SPA: qualquer navegação fora de /api entrega o index.html compilado do React
+if (frontendDistPath) {
+  app.get("*", (req, res, next) => {
+    if (req.path.startsWith("/api") || req.path.startsWith("/socket.io")) {
+      return next();
+    }
+    res.sendFile(path.join(frontendDistPath, "index.html"));
+  });
+}
+
+// Tratamento de rotas inexistentes da API
+app.use("/api", (_req, res) => {
+  res.status(404).json({ error: "Endpoint não encontrado." });
+});
+
+// Tratamento geral de rotas inexistentes
 app.use((_req, res) => {
+  if (frontendDistPath) {
+    return res.sendFile(path.join(frontendDistPath, "index.html"));
+  }
   res.status(404).json({ error: "Endpoint não encontrado." });
 });
 

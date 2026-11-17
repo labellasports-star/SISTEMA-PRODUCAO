@@ -253,20 +253,20 @@ export function Sector11DispatchPanel({ currentUser }: Sector11DispatchPanelProp
   return (
     <div className="space-y-6">
       {/* Cabeçalho do Setor 11 */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+      <div className="rounded-2xl bg-slate-900 border border-slate-800 p-6 shadow-xl">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-600">
+            <div className="w-14 h-14 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
               <Truck className="w-8 h-8" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
                   SETOR 11
                 </span>
-                <h1 className="text-2xl font-bold text-slate-900">Despache para Oficina de Costura</h1>
+                <h1 className="text-2xl font-bold text-white">Despache para Oficina de Costura</h1>
               </div>
-              <p className="text-slate-500 text-sm mt-1">
+              <p className="text-slate-400 text-sm mt-1">
                 Remessas com Romaneio de Envio sequencial, controle de grade, prazo e assinatura digital HMAC.
               </p>
             </div>
@@ -276,9 +276,9 @@ export function Sector11DispatchPanel({ currentUser }: Sector11DispatchPanelProp
             <button
               onClick={loadData}
               disabled={loading}
-              className="px-3.5 py-2 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 flex items-center gap-2 text-sm font-medium transition"
+              className="flex items-center gap-1.5 rounded-lg bg-slate-800 px-3.5 py-2 text-xs font-medium text-slate-300 hover:bg-slate-700 transition border border-slate-700"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
               Atualizar
             </button>
           </div>
@@ -286,46 +286,46 @@ export function Sector11DispatchPanel({ currentUser }: Sector11DispatchPanelProp
 
         {/* Mensagens de Sucesso ou Erro */}
         {successMsg && (
-          <div className="mt-4 p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center gap-2 text-sm">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+          <div className="mt-4 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 flex items-center gap-2 text-sm">
+            <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
             <span>{successMsg}</span>
           </div>
         )}
         {error && (
-          <div className="mt-4 p-4 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 flex items-center gap-2 text-sm">
-            <AlertTriangle className="w-5 h-5 text-rose-600 flex-shrink-0" />
+          <div className="mt-4 p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 flex items-center gap-2 text-sm">
+            <AlertTriangle className="w-5 h-5 text-rose-400 flex-shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {/* Contadores da Fila */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
-          <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total na Fila</span>
-            <div className="text-2xl font-bold text-slate-900 mt-1">{queueData?.totalBatches || 0}</div>
+          <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
+            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Total na Fila</span>
+            <div className="text-2xl font-bold text-white mt-1">{queueData?.totalBatches || 0}</div>
           </div>
-          <div className="p-4 rounded-lg bg-amber-50 border border-amber-200">
-            <span className="text-xs font-semibold text-amber-700 uppercase tracking-wider">Aguardando Envio</span>
-            <div className="text-2xl font-bold text-amber-900 mt-1">{queueData?.waitingCount || 0}</div>
+          <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
+            <span className="text-[11px] font-semibold text-amber-400 uppercase tracking-wider">Aguardando Envio</span>
+            <div className="text-2xl font-bold text-amber-300 mt-1">{queueData?.waitingCount || 0}</div>
           </div>
-          <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
-            <span className="text-xs font-semibold text-blue-700 uppercase tracking-wider">Em Separação</span>
-            <div className="text-2xl font-bold text-blue-900 mt-1">{queueData?.inProgressCount || 0}</div>
+          <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
+            <span className="text-[11px] font-semibold text-sky-400 uppercase tracking-wider">Em Separação</span>
+            <div className="text-2xl font-bold text-sky-300 mt-1">{queueData?.inProgressCount || 0}</div>
           </div>
-          <div className="p-4 rounded-lg bg-emerald-50 border border-emerald-200">
-            <span className="text-xs font-semibold text-emerald-700 uppercase tracking-wider">Oficinas Ativas</span>
-            <div className="text-2xl font-bold text-emerald-900 mt-1">{partners.length}</div>
+          <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
+            <span className="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider">Oficinas Ativas</span>
+            <div className="text-2xl font-bold text-emerald-300 mt-1">{partners.length}</div>
           </div>
         </div>
 
         {/* Tabs de Filtro */}
-        <div className="flex border-b border-slate-200 mt-6 gap-2">
+        <div className="flex border-b border-slate-800 mt-6 gap-2">
           <button
             onClick={() => setFilterTab("ALL")}
             className={`pb-3 px-3 text-sm font-medium border-b-2 transition ${
               filterTab === "ALL"
-                ? "border-amber-600 text-amber-600"
-                : "border-transparent text-slate-500 hover:text-slate-700"
+                ? "border-amber-400 text-amber-400 font-semibold"
+                : "border-transparent text-slate-400 hover:text-slate-200"
             }`}
           >
             Todos os Lotes ({batches.length})
@@ -334,8 +334,8 @@ export function Sector11DispatchPanel({ currentUser }: Sector11DispatchPanelProp
             onClick={() => setFilterTab("WAITING")}
             className={`pb-3 px-3 text-sm font-medium border-b-2 transition ${
               filterTab === "WAITING"
-                ? "border-amber-600 text-amber-600"
-                : "border-transparent text-slate-500 hover:text-slate-700"
+                ? "border-amber-400 text-amber-400 font-semibold"
+                : "border-transparent text-slate-400 hover:text-slate-200"
             }`}
           >
             Aguardando ({queueData?.waitingCount || 0})
@@ -344,8 +344,8 @@ export function Sector11DispatchPanel({ currentUser }: Sector11DispatchPanelProp
             onClick={() => setFilterTab("IN_PROGRESS")}
             className={`pb-3 px-3 text-sm font-medium border-b-2 transition ${
               filterTab === "IN_PROGRESS"
-                ? "border-amber-600 text-amber-600"
-                : "border-transparent text-slate-500 hover:text-slate-700"
+                ? "border-amber-400 text-amber-400 font-semibold"
+                : "border-transparent text-slate-400 hover:text-slate-200"
             }`}
           >
             Em Preparação ({queueData?.inProgressCount || 0})
@@ -355,22 +355,22 @@ export function Sector11DispatchPanel({ currentUser }: Sector11DispatchPanelProp
 
       {/* Listagem de Lotes do Setor 11 */}
       {filteredBatches.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-12 text-center text-slate-500">
-          <Truck className="w-12 h-12 mx-auto text-slate-300 mb-3" />
-          <h3 className="text-lg font-medium text-slate-800">Nenhum lote neste estágio no momento</h3>
-          <p className="text-sm mt-1">Lotes concluídos na Separação (Setor 10) aparecerão aqui automaticamente.</p>
+        <div className="col-span-full py-16 text-center rounded-2xl bg-slate-900 border border-slate-800">
+          <Truck className="h-10 w-10 text-slate-600 mx-auto mb-2" />
+          <h4 className="text-sm font-semibold text-slate-300">Nenhum lote neste estágio no momento</h4>
+          <p className="text-xs text-slate-500 mt-1">Lotes concluídos na Separação (Setor 10) aparecerão aqui automaticamente.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredBatches.map((batch: any) => (
             <div
               key={batch.id}
-              className="bg-white rounded-xl shadow-sm border border-slate-200 hover:border-amber-400 transition p-5 flex flex-col justify-between"
+              className="rounded-2xl bg-slate-900 border border-slate-800 hover:border-amber-500/40 transition p-5 flex flex-col justify-between shadow-xl"
             >
               <div>
                 <div className="flex items-start justify-between gap-2 mb-3">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="font-mono text-sm font-bold text-slate-900 bg-slate-100 px-2.5 py-1 rounded">
+                    <span className="font-mono text-xs font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded">
                       {batch.batchNumber}
                     </span>
                     <button
@@ -379,7 +379,7 @@ export function Sector11DispatchPanel({ currentUser }: Sector11DispatchPanelProp
                         setSelectedSheetBatchId(batch.id);
                         setIsSheetModalOpen(true);
                       }}
-                      className="inline-flex items-center gap-1 rounded bg-sky-50 hover:bg-sky-100 text-sky-700 px-2 py-0.5 text-xs font-semibold border border-sky-200 transition"
+                      className="inline-flex items-center gap-1 rounded bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 px-2 py-0.5 text-xs font-semibold border border-sky-500/20 transition"
                       title="Abrir Ficha Universal do Pedido"
                     >
                       <Eye className="w-3.5 h-3.5" />
@@ -387,12 +387,12 @@ export function Sector11DispatchPanel({ currentUser }: Sector11DispatchPanelProp
                     </button>
                   </div>
                   <span
-                    className={`px-2 py-0.5 rounded text-xs font-semibold ${
+                    className={`px-2 py-0.5 rounded text-[11px] font-semibold ${
                       batch.batchStatus === "WAITING"
-                        ? "bg-amber-100 text-amber-800"
+                        ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
                         : batch.batchStatus === "IN_PROGRESS"
-                        ? "bg-blue-100 text-blue-800"
-                        : "bg-emerald-100 text-emerald-800"
+                        ? "bg-sky-500/20 text-sky-300 border border-sky-500/30"
+                        : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
                     }`}
                   >
                     {batch.batchStatus === "WAITING"
@@ -403,29 +403,29 @@ export function Sector11DispatchPanel({ currentUser }: Sector11DispatchPanelProp
                   </span>
                 </div>
 
-                <h3 className="font-semibold text-slate-900 text-base line-clamp-1">
+                <h3 className="font-semibold text-white text-base line-clamp-1">
                   {batch.productionOrder?.title || "Ordem de Produção"}
                 </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  OP: <strong className="font-mono text-slate-700">{batch.productionOrder?.opNumber}</strong>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  OP: <strong className="font-mono text-slate-300">{batch.productionOrder?.opNumber}</strong>
                 </p>
-                <p className="text-xs text-slate-500">
-                  Cliente: <span className="text-slate-700">{batch.productionOrder?.customer?.companyName || "N/D"}</span>
+                <p className="text-xs text-slate-400">
+                  Cliente: <span className="text-slate-300">{batch.productionOrder?.customer?.companyName || "N/D"}</span>
                 </p>
 
-                <div className="mt-4 p-3 rounded-lg bg-amber-50/50 border border-amber-100 flex items-center justify-between text-sm">
-                  <span className="text-slate-600 font-medium">Quantidade:</span>
-                  <span className="font-bold text-amber-900">{batch.quantity} peças</span>
+                <div className="mt-4 p-3 rounded-xl bg-slate-950/60 border border-slate-800 flex items-center justify-between text-sm">
+                  <span className="text-slate-400 font-medium">Quantidade:</span>
+                  <span className="font-bold text-amber-400">{batch.quantity} peças</span>
                 </div>
               </div>
 
               {/* Ações do Lote */}
-              <div className="mt-5 pt-4 border-t border-slate-100 flex flex-col gap-2">
+              <div className="mt-5 pt-4 border-t border-slate-800 flex flex-col gap-2">
                 {batch.batchStatus === "WAITING" && (
                   <button
                     onClick={() => handleStartBatch(batch.id)}
                     disabled={submitting}
-                    className="w-full py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 text-sm font-medium transition flex items-center justify-center gap-1.5"
+                    className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-sm font-medium transition flex items-center justify-center gap-1.5 border border-slate-700"
                   >
                     Iniciar Preparação
                   </button>
@@ -433,7 +433,7 @@ export function Sector11DispatchPanel({ currentUser }: Sector11DispatchPanelProp
 
                 <button
                   onClick={() => handleOpenDispatchModal(batch)}
-                  className="w-full py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 text-sm font-medium transition flex items-center justify-center gap-1.5 shadow-sm"
+                  className="w-full py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-sm font-medium transition flex items-center justify-center gap-1.5 shadow-sm"
                 >
                   <Truck className="w-4 h-4" />
                   Despachar para Oficina
@@ -442,7 +442,7 @@ export function Sector11DispatchPanel({ currentUser }: Sector11DispatchPanelProp
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleViewManifest(batch.id)}
-                    className="flex-1 py-1.5 border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 text-xs font-medium transition flex items-center justify-center gap-1"
+                    className="flex-1 py-1.5 border border-slate-700 bg-slate-800 text-slate-300 rounded-lg hover:bg-slate-700 text-xs font-medium transition flex items-center justify-center gap-1"
                   >
                     <FileText className="w-3.5 h-3.5" />
                     Romaneio
@@ -454,7 +454,7 @@ export function Sector11DispatchPanel({ currentUser }: Sector11DispatchPanelProp
                       setReturnReason("");
                       setIsReturnModalOpen(true);
                     }}
-                    className="flex-1 py-1.5 border border-rose-200 text-rose-700 rounded-lg hover:bg-rose-50 text-xs font-medium transition flex items-center justify-center gap-1"
+                    className="flex-1 py-1.5 border border-rose-500/30 bg-rose-500/10 text-rose-300 rounded-lg hover:bg-rose-500/20 text-xs font-medium transition flex items-center justify-center gap-1"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
                     Devolver
@@ -468,23 +468,23 @@ export function Sector11DispatchPanel({ currentUser }: Sector11DispatchPanelProp
 
       {/* MODAL 1: Form de Despache para Oficina */}
       {isDispatchModalOpen && selectedBatch && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-2xl w-full p-6 my-8">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-200">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-slate-900 rounded-2xl shadow-2xl border border-slate-800 max-w-2xl w-full p-6 my-8 text-white">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20">
                   <Truck className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900">Despachar Lote para Oficina de Costura</h3>
-                  <p className="text-xs text-slate-500 font-mono">
+                  <h3 className="text-lg font-bold text-white">Despachar Lote para Oficina de Costura</h3>
+                  <p className="text-xs text-slate-400 font-mono">
                     Lote: {selectedBatch.batchNumber} ({selectedBatch.quantity} peças)
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setIsDispatchModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 p-1"
+                className="text-slate-400 hover:text-white p-1"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -493,17 +493,17 @@ export function Sector11DispatchPanel({ currentUser }: Sector11DispatchPanelProp
             <form onSubmit={handleConfirmDispatch} className="space-y-5 mt-5">
               {/* Seleção de Oficina */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                <label className="block text-sm font-semibold text-slate-300 mb-1.5">
                   Oficina Parceira de Costura *
                 </label>
                 <select
                   value={selectedPartnerId}
                   onChange={(e) => setSelectedPartnerId(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-800 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-700 bg-slate-950 text-white text-sm focus:border-amber-500 focus:outline-none"
                   required
                 >
                   {partners.map((p) => (
-                    <option key={p.id} value={p.id}>
+                    <option key={p.id} value={p.id} className="bg-slate-900 text-white">
                       {p.name} ({p.type === "INTERNAL" ? "Célula Interna" : "Terceirizada"}) - R$ {p.basePricePerPc.toFixed(2)}/peça
                     </option>
                   ))}
@@ -512,7 +512,7 @@ export function Sector11DispatchPanel({ currentUser }: Sector11DispatchPanelProp
 
               {/* Data Prevista de Retorno */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                <label className="block text-sm font-semibold text-slate-300 mb-1.5">
                   Prazo Acordado de Retorno *
                 </label>
                 <div className="relative">
@@ -520,25 +520,25 @@ export function Sector11DispatchPanel({ currentUser }: Sector11DispatchPanelProp
                     type="datetime-local"
                     value={expectedReturnDate}
                     onChange={(e) => setExpectedReturnDate(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-slate-800 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-700 bg-slate-950 text-white text-sm focus:border-amber-500 focus:outline-none"
                     required
                   />
                   <Calendar className="w-4 h-4 text-slate-400 absolute right-3 top-3 pointer-events-none" />
                 </div>
-                <p className="text-xs text-slate-500 mt-1">O prazo deve ser uma data e horário futuro.</p>
+                <p className="text-xs text-slate-400 mt-1">O prazo deve ser uma data e horário futuro.</p>
               </div>
 
               {/* Grade de Tamanhos */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-sm font-semibold text-slate-700">
+                  <label className="text-sm font-semibold text-slate-300">
                     Grade de Tamanhos Enviada *
                   </label>
                   <span
                     className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${
                       totalGridPieces === selectedBatch.quantity
-                        ? "bg-emerald-100 text-emerald-800"
-                        : "bg-rose-100 text-rose-800"
+                        ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                        : "bg-rose-500/20 text-rose-300 border border-rose-500/30"
                     }`}
                   >
                     Total: {totalGridPieces} / {selectedBatch.quantity} peças
@@ -547,8 +547,8 @@ export function Sector11DispatchPanel({ currentUser }: Sector11DispatchPanelProp
 
                 <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
                   {Object.keys(sizeGrid).map((sizeKey) => (
-                    <div key={sizeKey} className="p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-center">
-                      <span className="block text-xs font-bold text-slate-600 mb-1">{sizeKey}</span>
+                    <div key={sizeKey} className="p-2.5 rounded-lg border border-slate-800 bg-slate-950 text-center">
+                      <span className="block text-xs font-bold text-slate-400 mb-1">{sizeKey}</span>
                       <input
                         type="number"
                         min="0"
@@ -559,7 +559,7 @@ export function Sector11DispatchPanel({ currentUser }: Sector11DispatchPanelProp
                             [sizeKey]: Math.max(0, parseInt(e.target.value, 10) || 0),
                           })
                         }
-                        className="w-full text-center px-1 py-1 rounded border border-slate-300 font-mono text-sm bg-white"
+                        className="w-full text-center px-1 py-1 rounded border border-slate-700 font-mono text-sm bg-slate-900 text-white focus:border-amber-500 focus:outline-none"
                       />
                     </div>
                   ))}
@@ -568,22 +568,22 @@ export function Sector11DispatchPanel({ currentUser }: Sector11DispatchPanelProp
 
               {/* Observações */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                <label className="block text-sm font-semibold text-slate-300 mb-1">
                   Observações / Instruções para a Costura
                 </label>
                 <textarea
                   value={dispatchNotes}
                   onChange={(e) => setDispatchNotes(e.target.value)}
                   placeholder="Ex: Atenção ao vivo na gola, linha reforçada..."
-                  className="w-full px-3.5 py-2 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                  className="w-full px-3.5 py-2 rounded-lg border border-slate-700 bg-slate-950 text-white text-sm focus:border-amber-500 focus:outline-none"
                   rows={2}
                 />
               </div>
 
               {/* Assinatura Digital PIN */}
-              <div className="p-4 rounded-xl bg-amber-50 border border-amber-200">
-                <div className="flex items-center gap-2 mb-2 text-amber-900 font-semibold text-sm">
-                  <Lock className="w-4 h-4 text-amber-600" />
+              <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30">
+                <div className="flex items-center gap-2 mb-2 text-amber-300 font-semibold text-sm">
+                  <Lock className="w-4 h-4 text-amber-400" />
                   Assinatura Digital do Expedidor (PIN) *
                 </div>
                 <input
@@ -592,26 +592,26 @@ export function Sector11DispatchPanel({ currentUser }: Sector11DispatchPanelProp
                   value={operatorPin}
                   onChange={(e) => setOperatorPin(e.target.value.replace(/\D/g, ""))}
                   placeholder="Digite seu PIN de 4 a 6 dígitos"
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-amber-300 bg-white font-mono text-sm tracking-widest text-center focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-amber-500/40 bg-slate-950 text-white font-mono text-sm tracking-widest text-center focus:border-amber-400 focus:outline-none"
                   required
                 />
-                <p className="text-xs text-amber-700 mt-1">
+                <p className="text-xs text-amber-400/80 mt-1">
                   A assinatura HMAC-SHA-256 será atrelada ao romaneio com o seu PIN autenticado.
                 </p>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
                 <button
                   type="button"
                   onClick={() => setIsDispatchModalOpen(false)}
-                  className="px-4 py-2.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 text-sm font-medium"
+                  className="px-4 py-2.5 rounded-lg border border-slate-700 text-slate-300 hover:bg-slate-800 text-sm font-medium transition"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={submitting || totalGridPieces !== selectedBatch.quantity}
-                  className="px-5 py-2.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-sm font-bold flex items-center gap-2 transition disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-sm font-bold flex items-center gap-2 transition disabled:opacity-50 shadow-sm"
                 >
                   <ShieldCheck className="w-4 h-4" />
                   {submitting ? "Despachando..." : "Confirmar e Gerar Romaneio"}
@@ -624,25 +624,25 @@ export function Sector11DispatchPanel({ currentUser }: Sector11DispatchPanelProp
 
       {/* MODAL 2: Visualização e Impressão do Romaneio de Envio */}
       {isManifestModalOpen && activeManifest && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-3xl w-full p-8 my-8 print:p-0 print:border-none print:shadow-none">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-slate-900 rounded-2xl shadow-2xl border border-slate-800 max-w-3xl w-full p-8 my-8 print:p-0 print:border-none print:shadow-none print:bg-white text-white">
             {/* Controles de Fechamento / Impressão */}
-            <div className="flex items-center justify-between pb-4 border-b border-slate-200 mb-6 print:hidden">
-              <span className="text-xs font-bold px-2.5 py-1 rounded bg-amber-100 text-amber-800">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-6 print:hidden">
+              <span className="text-xs font-bold px-2.5 py-1 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
                 VIA DE REMESSA OFICIAL
               </span>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => handleReprintManifest(activeManifest.id)}
                   disabled={submitting}
-                  className="px-3.5 py-2 bg-slate-900 text-white hover:bg-slate-800 rounded-lg text-sm font-medium flex items-center gap-2 transition"
+                  className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-sm font-medium flex items-center gap-2 transition border border-slate-700"
                 >
                   <Printer className="w-4 h-4" />
                   Imprimir / Reimprimir
                 </button>
                 <button
                   onClick={() => setIsManifestModalOpen(false)}
-                  className="text-slate-400 hover:text-slate-600 p-2"
+                  className="text-slate-400 hover:text-white p-2"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -650,15 +650,15 @@ export function Sector11DispatchPanel({ currentUser }: Sector11DispatchPanelProp
             </div>
 
             {/* CONTEÚDO IMPRIMÍVEL DO ROMANEIO */}
-            <div className="border border-slate-300 rounded-xl p-6 bg-white space-y-6">
+            <div className="border border-slate-800 rounded-xl p-6 bg-slate-950 space-y-6 print:bg-white print:border-slate-300 print:text-black">
               {/* Cabeçalho */}
-              <div className="flex items-start justify-between border-b pb-5">
+              <div className="flex items-start justify-between border-b border-slate-800 pb-5 print:border-slate-300">
                 <div>
-                  <h2 className="text-xl font-black text-slate-900 uppercase tracking-tight">
+                  <h2 className="text-xl font-black text-white uppercase tracking-tight print:text-black">
                     Romaneio de Envio de Costura
                   </h2>
-                  <p className="text-xs text-slate-500 font-medium">PCP Industrial — Gestão de Produção e Rastreabilidade</p>
-                  <div className="text-sm font-mono font-bold text-amber-700 mt-2">
+                  <p className="text-xs text-slate-400 font-medium print:text-slate-600">PCP Industrial — Gestão de Produção e Rastreabilidade</p>
+                  <div className="text-sm font-mono font-bold text-amber-400 mt-2 print:text-amber-800">
                     Nº: {activeManifest.manifestNumber}
                   </div>
                 </div>
@@ -672,28 +672,28 @@ export function Sector11DispatchPanel({ currentUser }: Sector11DispatchPanelProp
                       level="M"
                     />
                   </div>
-                  <span className="text-[10px] font-mono text-slate-400 mt-1 uppercase">QR de Autenticidade</span>
+                  <span className="text-[10px] font-mono text-slate-400 mt-1 uppercase print:text-slate-600">QR de Autenticidade</span>
                 </div>
               </div>
 
               {/* Informações da Oficina e da OP */}
               <div className="grid grid-cols-2 gap-4 text-xs">
-                <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-1">
-                  <span className="font-bold text-slate-800 block text-xs uppercase mb-1">Dados da Oficina:</span>
+                <div className="p-3 bg-slate-900 rounded-lg border border-slate-800 space-y-1 print:bg-slate-50 print:border-slate-300 print:text-black">
+                  <span className="font-bold text-slate-200 block text-xs uppercase mb-1 print:text-black">Dados da Oficina:</span>
                   <p><strong>Nome:</strong> {activeManifest.sewingPartner?.name}</p>
                   <p><strong>Contato:</strong> {activeManifest.sewingPartner?.contactPerson || "N/A"}</p>
                   <p><strong>Telefone:</strong> {activeManifest.sewingPartner?.phone || "N/A"}</p>
                   <p><strong>Endereço:</strong> {activeManifest.sewingPartner?.address || "N/A"}</p>
                 </div>
 
-                <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-1">
-                  <span className="font-bold text-slate-800 block text-xs uppercase mb-1">Dados do Lote:</span>
+                <div className="p-3 bg-slate-900 rounded-lg border border-slate-800 space-y-1 print:bg-slate-50 print:border-slate-300 print:text-black">
+                  <span className="font-bold text-slate-200 block text-xs uppercase mb-1 print:text-black">Dados do Lote:</span>
                   <p><strong>OP:</strong> {activeManifest.productionOrder?.opNumber}</p>
                   <p><strong>Lote:</strong> {activeManifest.opBatch?.batchNumber || "Lote de Produção"}</p>
                   <p><strong>Cliente:</strong> {activeManifest.productionOrder?.customer?.companyName || "N/D"}</p>
                   <p>
                     <strong>Prazo de Retorno:</strong>{" "}
-                    <span className="text-amber-800 font-bold">
+                    <span className="text-amber-400 font-bold print:text-amber-800">
                       {new Date(activeManifest.expectedReturnDate).toLocaleDateString("pt-BR")} às{" "}
                       {new Date(activeManifest.expectedReturnDate).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                     </span>
@@ -703,27 +703,27 @@ export function Sector11DispatchPanel({ currentUser }: Sector11DispatchPanelProp
 
               {/* Grade de Tamanhos */}
               <div>
-                <h4 className="text-xs font-bold text-slate-800 uppercase mb-2">Grade de Peças Despachadas</h4>
-                <div className="border border-slate-200 rounded-lg overflow-hidden">
+                <h4 className="text-xs font-bold text-slate-300 uppercase mb-2 print:text-black">Grade de Peças Despachadas</h4>
+                <div className="border border-slate-800 rounded-lg overflow-hidden print:border-slate-300">
                   <table className="w-full text-xs text-center">
-                    <thead className="bg-slate-100 text-slate-700 font-bold">
+                    <thead className="bg-slate-900 text-slate-300 font-bold print:bg-slate-100 print:text-black">
                       <tr>
                         {Object.keys(JSON.parse(activeManifest.sizeGridBreakdown || "{}")).map((sz) => (
-                          <th key={sz} className="py-2 border-r last:border-none border-slate-200 uppercase">
+                          <th key={sz} className="py-2 border-r last:border-none border-slate-800 uppercase print:border-slate-300">
                             {sz}
                           </th>
                         ))}
-                        <th className="py-2 bg-amber-100 text-amber-900 font-black">TOTAL</th>
+                        <th className="py-2 bg-amber-500/20 text-amber-300 font-black border-l border-slate-800 print:bg-amber-100 print:text-amber-900 print:border-slate-300">TOTAL</th>
                       </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="divide-y divide-slate-800 print:divide-slate-300">
                       <tr>
                         {Object.values(JSON.parse(activeManifest.sizeGridBreakdown || "{}")).map((qty: any, idx) => (
-                          <td key={idx} className="py-2.5 font-mono border-r last:border-none border-slate-200 font-bold text-slate-800">
+                          <td key={idx} className="py-2.5 font-mono border-r last:border-none border-slate-800 font-bold text-slate-200 print:border-slate-300 print:text-black">
                             {qty}
                           </td>
                         ))}
-                        <td className="py-2.5 font-mono font-black text-amber-900 bg-amber-50">
+                        <td className="py-2.5 font-mono font-black text-amber-300 bg-amber-500/10 print:text-amber-900 print:bg-amber-50">
                           {activeManifest.totalQuantity}
                         </td>
                       </tr>
@@ -733,9 +733,9 @@ export function Sector11DispatchPanel({ currentUser }: Sector11DispatchPanelProp
               </div>
 
               {/* Assinatura Digital Criptográfica */}
-              <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 text-[10px] text-slate-500 font-mono break-all">
+              <div className="p-2.5 bg-slate-900 rounded-lg border border-slate-800 text-[10px] text-slate-400 font-mono break-all print:bg-slate-50 print:border-slate-300 print:text-slate-600">
                 <strong>Assinatura Digital HMAC-SHA-256:</strong> {activeManifest.digitalSignatureHash}
-                <div className="mt-0.5 text-slate-400">
+                <div className="mt-0.5 text-slate-500 print:text-slate-600">
                   Emitido por: {activeManifest.createdBy?.name || currentUser.name} em {new Date(activeManifest.createdAt).toLocaleString("pt-BR")}
                   {activeManifest.reprintCount > 0 && ` (Reimpressão Nº ${activeManifest.reprintCount})`}
                 </div>
@@ -744,16 +744,16 @@ export function Sector11DispatchPanel({ currentUser }: Sector11DispatchPanelProp
               {/* Linhas de Assinatura Física */}
               <div className="grid grid-cols-2 gap-8 pt-8">
                 <div className="text-center">
-                  <div className="border-t border-slate-400 pt-1.5 text-xs text-slate-700 font-semibold">
+                  <div className="border-t border-slate-700 pt-1.5 text-xs text-slate-300 font-semibold print:border-slate-400 print:text-black">
                     Expedição / PCP da Fábrica
                   </div>
-                  <div className="text-[10px] text-slate-400">Assinatura do Expedidor</div>
+                  <div className="text-[10px] text-slate-500 print:text-slate-600">Assinatura do Expedidor</div>
                 </div>
                 <div className="text-center">
-                  <div className="border-t border-slate-400 pt-1.5 text-xs text-slate-700 font-semibold">
+                  <div className="border-t border-slate-700 pt-1.5 text-xs text-slate-300 font-semibold print:border-slate-400 print:text-black">
                     {activeManifest.sewingPartner?.name}
                   </div>
-                  <div className="text-[10px] text-slate-400">Assinatura do Responsável na Oficina</div>
+                  <div className="text-[10px] text-slate-500 print:text-slate-600">Assinatura do Responsável na Oficina</div>
                 </div>
               </div>
             </div>
@@ -763,63 +763,66 @@ export function Sector11DispatchPanel({ currentUser }: Sector11DispatchPanelProp
 
       {/* MODAL 3: Devolução para Retrabalho */}
       {isReturnModalOpen && selectedBatch && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-md w-full p-6">
-            <div className="flex items-center justify-between pb-3 border-b">
-              <h3 className="font-bold text-slate-900">Devolução de Lote (Retrabalho)</h3>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-900 rounded-2xl shadow-xl border border-rose-500/30 max-w-md w-full p-6 text-white">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <h3 className="font-bold text-white flex items-center gap-2">
+                <RotateCcw className="w-4 h-4 text-rose-400" />
+                Devolução de Lote (Retrabalho)
+              </h3>
               <button onClick={() => setIsReturnModalOpen(false)}>
-                <X className="w-5 h-5 text-slate-400" />
+                <X className="w-5 h-5 text-slate-400 hover:text-white" />
               </button>
             </div>
             <form onSubmit={handleConfirmReturn} className="space-y-4 mt-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Setor de Destino *</label>
+                <label className="block text-xs font-bold text-slate-300 mb-1">Setor de Destino *</label>
                 <select
                   value={returnTargetSector}
                   onChange={(e) => setReturnTargetSector(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border text-sm"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-950 text-white text-sm focus:border-rose-500 focus:outline-none"
                   required
                 >
-                  <option value="SEPARACAO">Setor 10: Separação</option>
-                  <option value="CALANDRA">Setor 09: Calandra</option>
-                  <option value="INFESTO">Setor 08: Infesto</option>
-                  <option value="IMPRESSAO">Setor 07: Impressão</option>
+                  <option value="SEPARACAO" className="bg-slate-900 text-white">Setor 10: Separação</option>
+                  <option value="CALANDRA" className="bg-slate-900 text-white">Setor 09: Calandra</option>
+                  <option value="INFESTO" className="bg-slate-900 text-white">Setor 08: Infesto</option>
+                  <option value="IMPRESSAO" className="bg-slate-900 text-white">Setor 07: Impressão</option>
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Motivo Detalhado *</label>
+                <label className="block text-xs font-bold text-slate-300 mb-1">Motivo Detalhado *</label>
                 <textarea
                   value={returnReason}
                   onChange={(e) => setReturnReason(e.target.value)}
                   placeholder="Descreva o motivo da devolução..."
-                  className="w-full px-3 py-2 rounded-lg border text-sm"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-950 text-white text-sm focus:border-rose-500 focus:outline-none"
                   rows={3}
                   required
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">PIN de Assinatura *</label>
+                <label className="block text-xs font-bold text-slate-300 mb-1">PIN de Assinatura *</label>
                 <input
                   type="password"
                   value={returnPin}
                   onChange={(e) => setReturnPin(e.target.value)}
                   placeholder="PIN"
-                  className="w-full px-3 py-2 rounded-lg border text-sm font-mono text-center"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-950 text-white text-sm font-mono text-center tracking-widest focus:border-rose-500 focus:outline-none"
                   required
                 />
               </div>
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-800">
                 <button
                   type="button"
                   onClick={() => setIsReturnModalOpen(false)}
-                  className="px-4 py-2 border rounded-lg text-sm"
+                  className="px-4 py-2 border border-slate-700 text-slate-300 hover:bg-slate-800 rounded-lg text-sm transition"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-4 py-2 bg-rose-600 text-white rounded-lg text-sm font-bold"
+                  className="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-sm font-bold transition"
                 >
                   Confirmar Devolução
                 </button>

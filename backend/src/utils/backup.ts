@@ -188,6 +188,7 @@ export async function createUploadsBackup(params?: {
  */
 export async function createFullSystemBackup(params?: {
   requestedBy?: string;
+  prismaClient?: PrismaClient;
 }): Promise<{
   success: boolean;
   backupId: string;
@@ -195,6 +196,8 @@ export async function createFullSystemBackup(params?: {
   manifest: BackupManifest;
 }> {
   ensureDirectoryExists(BACKUP_ROOT);
+
+  const activePrisma = params?.prismaClient || prisma;
 
   const timestamp = new Date()
     .toISOString()
@@ -210,7 +213,7 @@ export async function createFullSystemBackup(params?: {
   try {
     // 1. Snapshot transacionalmente consistente do SQLite via VACUUM INTO
     const stagingDbPath = path.join(stagingPath, "database.db").replace(/\\/g, "/");
-    await prisma.$executeRawUnsafe(`VACUUM INTO '${stagingDbPath}';`);
+    await activePrisma.$executeRawUnsafe(`VACUUM INTO '${stagingDbPath}';`);
 
     const dbStat = fs.statSync(stagingDbPath);
     const dbSha256 = calculateFileSha256(stagingDbPath);
@@ -343,6 +346,13 @@ export async function createFullSystemBackup(params?: {
     fs.appendFileSync(LOG_FILE, logEntry, "utf-8");
 
     console.log(`[Backup Service] Backup completo '${backupId}' criado com sucesso (${manifest.totalFiles} arquivos, ${totalSizeBytes} bytes, integridade: ${integrityResult}).`);
+
+    // Aplicação automática de retenção configurada via BACKUP_RETENTION_COUNT (padrão: 7 backups mantidos)
+    const retentionLimit = Number(process.env.BACKUP_RETENTION_COUNT) || 7;
+    const pruneResult = pruneOldBackups({ maxBackups: retentionLimit });
+    if (pruneResult.deletedBackups.length > 0) {
+      console.log(`[Backup Retention] ${pruneResult.deletedBackups.length} backup(s) antigo(s) removido(s) conforme limite de retenção (${retentionLimit}).`);
+    }
 
     return {
       success: true,
@@ -500,6 +510,62 @@ export async function restoreUploadsBackup(backupId: string): Promise<{
 
   console.log(`[Backup Service] Backup '${backupId}' restaurado com sucesso (${restoredCount} arquivos).`);
   return { success: true, restoredFilesCount: restoredCount };
+}
+
+export interface BackupRetentionOptions {
+  maxBackups?: number;
+  maxAgeDays?: number;
+}
+
+/**
+ * Aplica política de retenção de backups, removendo snapshots antigos e preservando os mais recentes.
+ */
+export function pruneOldBackups(options: BackupRetentionOptions = {}): {
+  deletedBackups: string[];
+  keptBackups: string[];
+} {
+  ensureDirectoryExists(BACKUP_ROOT);
+  const maxBackups = options.maxBackups ?? 7;
+  const maxAgeDays = options.maxAgeDays ?? 30;
+  const now = Date.now();
+  const maxAgeMs = maxAgeDays * 24 * 60 * 60 * 1000;
+
+  const backups = listAvailableBackups(); // Já ordenados decrescente por createdAt
+  const keptBackups: string[] = [];
+  const deletedBackups: string[] = [];
+
+  backups.forEach((b, index) => {
+    const ageMs = now - new Date(b.createdAt).getTime();
+    // Sempre preserva ao menos o mais recente; respeita o limite de quantidade e idade
+    const shouldKeep = index < maxBackups && (index === 0 || ageMs <= maxAgeMs);
+
+    if (shouldKeep) {
+      keptBackups.push(b.backupId);
+    } else {
+      const backupDir = path.join(BACKUP_ROOT, b.backupId);
+      try {
+        if (fs.existsSync(backupDir)) {
+          fs.rmSync(backupDir, { recursive: true, force: true });
+          deletedBackups.push(b.backupId);
+        }
+      } catch (err: any) {
+        console.error(`[Backup Retention] Falha ao remover backup antigo ${b.backupId}:`, err.message);
+      }
+    }
+  });
+
+  if (deletedBackups.length > 0) {
+    const pruneLogEntry = JSON.stringify({
+      timestamp: new Date().toISOString(),
+      type: "RETENTION_PRUNE",
+      deletedCount: deletedBackups.length,
+      deletedBackups,
+      keptCount: keptBackups.length,
+    }) + "\n";
+    fs.appendFileSync(LOG_FILE, pruneLogEntry, "utf-8");
+  }
+
+  return { deletedBackups, keptBackups };
 }
 
 /**

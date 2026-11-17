@@ -8,7 +8,7 @@ import { io } from "../server.js";
 
 export const batchesRouter = Router();
 
-batchesRouter.use(authenticateToken);
+batchesRouter.use(["/production-orders", "/batches"], authenticateToken);
 
 const createBatchSchema = z.object({
   quantity: z.number().int().min(1, "A quantidade do lote deve ser no mínimo 1 peça."),

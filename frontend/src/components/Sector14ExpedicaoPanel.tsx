@@ -314,20 +314,20 @@ export function Sector14ExpedicaoPanel({ currentUser }: Sector14ExpedicaoPanelPr
   return (
     <div className="space-y-6">
       {/* Header do Setor 14 */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+      <div className="rounded-2xl bg-slate-900 border border-slate-800 p-6 shadow-xl">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-purple-50 text-purple-600 rounded-xl border border-purple-100">
+            <div className="p-3 bg-purple-500/10 text-purple-400 rounded-xl border border-purple-500/20">
               <Truck className="w-7 h-7" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-bold text-slate-800">Setor 14 — Embalagem, Expedição & Entrega</h1>
-                <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-purple-100 text-purple-700">
-                  Etapa Final do PCP
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                  SETOR 14
                 </span>
+                <h1 className="text-2xl font-bold text-white">Embalagem, Expedição & Entrega</h1>
               </div>
-              <p className="text-sm text-slate-500 mt-0.5">
+              <p className="text-sm text-slate-400 mt-0.5">
                 Empacotamento em volumes, geração de romaneios de entrega (RD), baixa física com PIN e conclusão oficial da OP.
               </p>
             </div>
@@ -336,7 +336,7 @@ export function Sector14ExpedicaoPanel({ currentUser }: Sector14ExpedicaoPanelPr
           <button
             onClick={loadQueue}
             disabled={loading}
-            className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+            className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors border border-slate-700"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
             Atualizar Fila
@@ -345,75 +345,75 @@ export function Sector14ExpedicaoPanel({ currentUser }: Sector14ExpedicaoPanelPr
 
         {/* Mensagens de Feedback */}
         {error && (
-          <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg flex items-center justify-between">
+          <div className="mt-4 p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+              <AlertTriangle className="w-4 h-4 flex-shrink-0 text-rose-400" />
               <span>{error}</span>
             </div>
-            <button onClick={() => setError("")} className="text-red-500 hover:text-red-700 font-bold">×</button>
+            <button onClick={() => setError("")} className="text-rose-400 hover:text-rose-200 font-bold">×</button>
           </div>
         )}
 
         {successMessage && (
-          <div className="mt-4 p-3 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm rounded-lg flex items-center justify-between">
+          <div className="mt-4 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-sm flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+              <CheckCircle2 className="w-4 h-4 flex-shrink-0 text-emerald-400" />
               <span>{successMessage}</span>
             </div>
-            <button onClick={() => setSuccessMessage("")} className="text-emerald-500 hover:text-emerald-700 font-bold">×</button>
+            <button onClick={() => setSuccessMessage("")} className="text-emerald-400 hover:text-emerald-200 font-bold">×</button>
           </div>
         )}
       </div>
 
       {/* Métricas Rápidas */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <div className="text-xs font-medium text-slate-500">Lotes na Expedição</div>
-          <div className="text-2xl font-bold text-slate-800 mt-1">{queueMetrics.totalBatches}</div>
-          <div className="text-xs text-slate-400 mt-0.5">Aguardando saída física</div>
+        <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow-xl">
+          <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Lotes na Expedição</div>
+          <div className="text-2xl font-bold text-white mt-1">{queueMetrics.totalBatches}</div>
+          <div className="text-xs text-slate-500 mt-0.5">Aguardando saída física</div>
         </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <div className="text-xs font-medium text-slate-500">Total de Peças Prontas</div>
-          <div className="text-2xl font-bold text-purple-600 mt-1">{queueMetrics.totalPieces}</div>
-          <div className="text-xs text-slate-400 mt-0.5">Aprovadas pela Qualidade</div>
+        <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow-xl">
+          <div className="text-[11px] font-semibold text-purple-400 uppercase tracking-wider">Total de Peças Prontas</div>
+          <div className="text-2xl font-bold text-purple-300 mt-1">{queueMetrics.totalPieces}</div>
+          <div className="text-xs text-slate-500 mt-0.5">Aprovadas pela Qualidade</div>
         </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <div className="text-xs font-medium text-slate-500">Aguardando Volumes / Embalagem</div>
-          <div className="text-2xl font-bold text-amber-600 mt-1">{queueMetrics.pendingPackaging}</div>
-          <div className="text-xs text-slate-400 mt-0.5">Sem volumes cadastrados</div>
+        <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow-xl">
+          <div className="text-[11px] font-semibold text-amber-400 uppercase tracking-wider">Aguardando Volumes / Embalagem</div>
+          <div className="text-2xl font-bold text-amber-300 mt-1">{queueMetrics.pendingPackaging}</div>
+          <div className="text-xs text-slate-500 mt-0.5">Sem volumes cadastrados</div>
         </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <div className="text-xs font-medium text-slate-500">Prontos para Romaneio / Entrega</div>
-          <div className="text-2xl font-bold text-emerald-600 mt-1">{queueMetrics.readyToDeliver}</div>
-          <div className="text-xs text-slate-400 mt-0.5">Volumes gerados</div>
+        <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow-xl">
+          <div className="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider">Prontos para Romaneio / Entrega</div>
+          <div className="text-2xl font-bold text-emerald-300 mt-1">{queueMetrics.readyToDeliver}</div>
+          <div className="text-xs text-slate-500 mt-0.5">Volumes gerados</div>
         </div>
       </div>
 
       {/* Tabela de Lotes em Expedição */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-4 border-b border-slate-200 flex items-center justify-between">
-          <h3 className="font-semibold text-slate-800 flex items-center gap-2">
-            <Package className="w-5 h-5 text-purple-600" />
+      <div className="bg-slate-900 rounded-2xl shadow-xl border border-slate-800 overflow-hidden">
+        <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+          <h3 className="font-semibold text-white flex items-center gap-2">
+            <Package className="w-5 h-5 text-purple-400" />
             Fila de Expedição e Entrega Final
           </h3>
         </div>
 
         {loading ? (
-          <div className="p-12 text-center text-slate-500">
-            <RefreshCw className="w-8 h-8 animate-spin mx-auto text-purple-600 mb-2" />
+          <div className="p-12 text-center text-slate-400">
+            <RefreshCw className="w-8 h-8 animate-spin mx-auto text-purple-400 mb-2" />
             Carregando lotes da Expedição...
           </div>
         ) : queueBatches.length === 0 ? (
-          <div className="p-12 text-center text-slate-500">
-            <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
-            <p className="font-medium text-slate-700">Nenhum lote pendente de expedição</p>
-            <p className="text-xs text-slate-400 mt-1">Todos os lotes foram entregues ao cliente final.</p>
+          <div className="py-16 text-center">
+            <CheckCircle2 className="h-10 w-10 text-slate-600 mx-auto mb-2" />
+            <h4 className="text-sm font-semibold text-slate-300">Nenhum lote pendente de expedição</h4>
+            <p className="text-xs text-slate-500 mt-1">Todos os lotes foram entregues ao cliente final.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-sm">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600">
+                <tr className="bg-slate-950 border-b border-slate-800 text-xs font-semibold text-slate-400">
                   <th className="py-3 px-4">Lote / OP</th>
                   <th className="py-3 px-4">Cliente / Pedido</th>
                   <th className="py-3 px-4 text-center">Quantidade</th>
@@ -422,7 +422,7 @@ export function Sector14ExpedicaoPanel({ currentUser }: Sector14ExpedicaoPanelPr
                   <th className="py-3 px-4 text-right">Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-800/60">
                 {queueBatches.map((batch: any) => {
                   const hasVolumes = batch.packageVolumes && batch.packageVolumes.length > 0;
                   const lastManifest = batch.deliveryManifests && batch.deliveryManifests.length > 0
@@ -430,27 +430,27 @@ export function Sector14ExpedicaoPanel({ currentUser }: Sector14ExpedicaoPanelPr
                     : null;
 
                   return (
-                    <tr key={batch.id} className="hover:bg-slate-50/70">
+                    <tr key={batch.id} className="hover:bg-slate-800/40 text-slate-200">
                       <td className="py-3 px-4">
-                        <div className="font-semibold text-slate-800">{batch.batchNumber}</div>
+                        <div className="font-semibold text-white">{batch.batchNumber}</div>
                         <div className="text-xs font-mono text-slate-400">{batch.productionOrder?.opNumber}</div>
                       </td>
                       <td className="py-3 px-4">
-                        <div className="font-medium text-slate-800">{batch.productionOrder?.customer?.companyName || "Cliente"}</div>
-                        <div className="text-xs text-slate-500">{batch.productionOrder?.title || batch.productionOrder?.productType}</div>
+                        <div className="font-medium text-slate-200">{batch.productionOrder?.customer?.companyName || "Cliente"}</div>
+                        <div className="text-xs text-slate-400">{batch.productionOrder?.title || batch.productionOrder?.productType}</div>
                       </td>
                       <td className="py-3 px-4 text-center">
-                        <span className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-50 text-purple-700 border border-purple-100">
+                        <span className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
                           {batch.quantity} pçs
                         </span>
                       </td>
                       <td className="py-3 px-4 text-center">
                         {hasVolumes ? (
-                          <span className="px-2 py-0.5 text-xs font-semibold rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          <span className="px-2 py-0.5 text-xs font-semibold rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                             {batch.packageVolumes.length} vol(s)
                           </span>
                         ) : (
-                          <span className="px-2 py-0.5 text-xs font-medium rounded bg-amber-50 text-amber-700">
+                          <span className="px-2 py-0.5 text-xs font-medium rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
                             Pendente
                           </span>
                         )}
@@ -458,19 +458,19 @@ export function Sector14ExpedicaoPanel({ currentUser }: Sector14ExpedicaoPanelPr
                       <td className="py-3 px-4">
                         {lastManifest ? (
                           <div className="flex flex-col gap-1 items-start">
-                            <span className="text-xs font-mono font-bold text-purple-700">
+                            <span className="text-xs font-mono font-bold text-purple-400">
                               {lastManifest.manifestNumber}
                             </span>
                             <span className={`px-2 py-0.5 text-[11px] rounded font-medium ${
                               lastManifest.isDelivered
-                                ? "bg-emerald-50 text-emerald-700"
-                                : "bg-blue-50 text-blue-700"
+                                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                                : "bg-sky-500/20 text-sky-300 border border-sky-500/30"
                             }`}>
                               {lastManifest.isDelivered ? "Entregue ao Cliente" : "Em Trânsito / Aguardando Baixa"}
                             </span>
                           </div>
                         ) : (
-                          <span className="text-xs text-slate-400">Sem romaneio</span>
+                          <span className="text-xs text-slate-500">Sem romaneio</span>
                         )}
                       </td>
                       <td className="py-3 px-4 text-right space-x-1.5">
@@ -480,7 +480,7 @@ export function Sector14ExpedicaoPanel({ currentUser }: Sector14ExpedicaoPanelPr
                             setSelectedSheetBatchId(batch.id);
                             setIsSheetModalOpen(true);
                           }}
-                          className="px-2.5 py-1.5 text-xs font-semibold rounded-lg text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 transition-colors inline-flex items-center gap-1"
+                          className="px-2.5 py-1.5 text-xs font-semibold rounded-lg text-sky-400 bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 transition-colors inline-flex items-center gap-1"
                           title="Ver Ficha Universal do Pedido"
                         >
                           <Eye className="w-3.5 h-3.5" />
@@ -489,7 +489,7 @@ export function Sector14ExpedicaoPanel({ currentUser }: Sector14ExpedicaoPanelPr
 
                         <button
                           onClick={() => handleOpenVolumeModal(batch)}
-                          className="px-2.5 py-1.5 text-xs font-medium rounded-lg text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
+                          className="px-2.5 py-1.5 text-xs font-medium rounded-lg text-slate-300 bg-slate-800 hover:bg-slate-700 transition-colors border border-slate-700"
                         >
                           {hasVolumes ? "Editar Volumes" : "Registrar Volumes"}
                         </button>
@@ -497,7 +497,7 @@ export function Sector14ExpedicaoPanel({ currentUser }: Sector14ExpedicaoPanelPr
                         {hasVolumes && !lastManifest && (
                           <button
                             onClick={() => handleOpenManifestModal(batch)}
-                            className="px-2.5 py-1.5 text-xs font-semibold rounded-lg text-white bg-purple-600 hover:bg-purple-700 transition-colors"
+                            className="px-2.5 py-1.5 text-xs font-semibold rounded-lg text-white bg-purple-600 hover:bg-purple-500 transition-colors shadow-sm"
                           >
                             Gerar Romaneio (RD)
                           </button>
@@ -507,7 +507,7 @@ export function Sector14ExpedicaoPanel({ currentUser }: Sector14ExpedicaoPanelPr
                           <>
                             <button
                               onClick={() => handleViewManifest(lastManifest.id)}
-                              className="px-2.5 py-1.5 text-xs font-medium rounded-lg text-purple-700 bg-purple-50 hover:bg-purple-100 transition-colors"
+                              className="px-2.5 py-1.5 text-xs font-medium rounded-lg text-purple-300 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 transition-colors"
                             >
                               Ver Romaneio
                             </button>
@@ -515,7 +515,7 @@ export function Sector14ExpedicaoPanel({ currentUser }: Sector14ExpedicaoPanelPr
                             {!lastManifest.isDelivered && (
                               <button
                                 onClick={() => handleOpenDeliverModal(lastManifest)}
-                                className="px-2.5 py-1.5 text-xs font-bold rounded-lg text-white bg-emerald-600 hover:bg-emerald-700 transition-colors"
+                                className="px-2.5 py-1.5 text-xs font-bold rounded-lg text-white bg-emerald-600 hover:bg-emerald-500 transition-colors shadow-sm"
                               >
                                 Baixar Entrega
                               </button>
@@ -534,25 +534,25 @@ export function Sector14ExpedicaoPanel({ currentUser }: Sector14ExpedicaoPanelPr
 
       {/* MODAL 1: REGISTRO DE VOLUMES */}
       {isVolumeModalOpen && selectedBatch && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-xl w-full p-6 my-8">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-slate-900 rounded-2xl shadow-2xl border border-slate-800 max-w-xl w-full p-6 my-8 text-white">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
               <div className="flex items-center gap-2">
-                <Package className="w-5 h-5 text-purple-600" />
-                <h3 className="font-bold text-slate-800">Embalagem & Volumes — Lote {selectedBatch.batchNumber}</h3>
+                <Package className="w-5 h-5 text-purple-400" />
+                <h3 className="font-bold text-white text-lg">Embalagem & Volumes — Lote {selectedBatch.batchNumber}</h3>
               </div>
-              <button onClick={() => setIsVolumeModalOpen(false)} className="text-slate-400 hover:text-slate-600 font-bold text-xl">×</button>
+              <button onClick={() => setIsVolumeModalOpen(false)} className="text-slate-400 hover:text-white font-bold text-xl">×</button>
             </div>
 
             <form onSubmit={handleSubmitVolumes} className="mt-4 space-y-4">
-              <div className="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+              <div className="flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs">
                 <div>
-                  <span className="text-slate-500">Total do Lote: </span>
-                  <strong className="text-slate-800">{selectedBatch.quantity} peças</strong>
+                  <span className="text-slate-400">Total do Lote: </span>
+                  <strong className="text-white">{selectedBatch.quantity} peças</strong>
                 </div>
                 <div>
-                  <span className="text-slate-500">Soma dos Volumes: </span>
-                  <strong className={totalPiecesInVolumes === selectedBatch.quantity ? "text-emerald-600" : "text-rose-600"}>
+                  <span className="text-slate-400">Soma dos Volumes: </span>
+                  <strong className={totalPiecesInVolumes === selectedBatch.quantity ? "text-emerald-400" : "text-rose-400"}>
                     {totalPiecesInVolumes} peças
                   </strong>
                 </div>
@@ -563,14 +563,14 @@ export function Sector14ExpedicaoPanel({ currentUser }: Sector14ExpedicaoPanelPr
                 {volumesList.map((vol, vIdx) => {
                   const volPieces = Object.values(vol.sizeBreakdown).reduce((s, q) => s + (Number(q) || 0), 0);
                   return (
-                    <div key={vIdx} className="p-3 bg-purple-50/40 rounded-xl border border-purple-200 space-y-2">
+                    <div key={vIdx} className="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-purple-800">Volume #{vol.volumeNumber} ({volPieces} pçs)</span>
+                        <span className="text-xs font-bold text-purple-300">Volume #{vol.volumeNumber} ({volPieces} pçs)</span>
                         {volumesList.length > 1 && (
                           <button
                             type="button"
                             onClick={() => handleRemoveVolume(vIdx)}
-                            className="text-rose-500 hover:text-rose-700 text-xs"
+                            className="text-rose-400 hover:text-rose-300 text-xs"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -581,20 +581,20 @@ export function Sector14ExpedicaoPanel({ currentUser }: Sector14ExpedicaoPanelPr
                       <div className="grid grid-cols-5 gap-2">
                         {["P", "M", "G", "GG", "XG"].map((sz) => (
                           <div key={sz}>
-                            <label className="block text-[11px] font-medium text-slate-500 mb-0.5">Tam {sz}</label>
+                            <label className="block text-[11px] font-medium text-slate-400 mb-0.5">Tam {sz}</label>
                             <input
                               type="number"
                               min="0"
                               value={vol.sizeBreakdown[sz] ?? 0}
                               onChange={(e) => handleUpdateVolumeSize(vIdx, sz, Number(e.target.value))}
-                              className="w-full px-2 py-1 text-xs border border-slate-300 rounded font-bold"
+                              className="w-full px-2 py-1 text-xs bg-slate-900 border border-slate-700 text-white rounded font-bold focus:border-purple-500 focus:outline-none"
                             />
                           </div>
                         ))}
                       </div>
 
                       <div>
-                        <label className="block text-[11px] text-slate-500 mb-0.5">Peso Estimado (kg, opcional):</label>
+                        <label className="block text-[11px] text-slate-400 mb-0.5">Peso Estimado (kg, opcional):</label>
                         <input
                           type="number"
                           step="0.1"
@@ -605,7 +605,7 @@ export function Sector14ExpedicaoPanel({ currentUser }: Sector14ExpedicaoPanelPr
                             updated[vIdx].weightKg = e.target.value ? Number(e.target.value) : undefined;
                             setVolumesList(updated);
                           }}
-                          className="w-32 px-2 py-1 text-xs border border-slate-300 rounded"
+                          className="w-32 px-2 py-1 text-xs bg-slate-900 border border-slate-700 text-white rounded focus:border-purple-500 focus:outline-none"
                         />
                       </div>
                     </div>
@@ -616,23 +616,23 @@ export function Sector14ExpedicaoPanel({ currentUser }: Sector14ExpedicaoPanelPr
               <button
                 type="button"
                 onClick={handleAddVolume}
-                className="w-full py-2 text-xs font-semibold text-purple-700 border border-dashed border-purple-300 rounded-lg hover:bg-purple-50 transition-colors flex items-center justify-center gap-1.5"
+                className="w-full py-2 text-xs font-semibold text-purple-400 border border-dashed border-purple-500/40 rounded-lg hover:bg-purple-500/10 transition-colors flex items-center justify-center gap-1.5"
               >
                 <Plus className="w-3.5 h-3.5" /> Adicionar Outro Volume
               </button>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
                 <button
                   type="button"
                   onClick={() => setIsVolumeModalOpen(false)}
-                  className="px-4 py-2 text-xs text-slate-600"
+                  className="px-4 py-2 text-xs text-slate-400 hover:text-white"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingVolumes || totalPiecesInVolumes !== selectedBatch.quantity}
-                  className="px-4 py-2 text-xs font-bold text-white bg-purple-600 hover:bg-purple-700 rounded-lg shadow-sm disabled:opacity-50"
+                  className="px-4 py-2 text-xs font-bold text-white bg-purple-600 hover:bg-purple-500 rounded-lg shadow-sm disabled:opacity-50"
                 >
                   {isSubmittingVolumes ? "Salvando..." : "Salvar Volumes"}
                 </button>
@@ -644,71 +644,71 @@ export function Sector14ExpedicaoPanel({ currentUser }: Sector14ExpedicaoPanelPr
 
       {/* MODAL 2: GERAÇÃO DE ROMANEIO (RD) */}
       {isManifestModalOpen && selectedBatch && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-md w-full p-6">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
-              <h3 className="font-bold text-slate-800">Gerar Romaneio de Entrega (RD)</h3>
-              <button onClick={() => setIsManifestModalOpen(false)} className="text-slate-400 hover:text-slate-600 font-bold text-xl">×</button>
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 rounded-2xl shadow-2xl border border-slate-800 max-w-md w-full p-6 text-white">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <h3 className="font-bold text-white">Gerar Romaneio de Entrega (RD)</h3>
+              <button onClick={() => setIsManifestModalOpen(false)} className="text-slate-400 hover:text-white font-bold text-xl">×</button>
             </div>
 
             <form onSubmit={handleSubmitManifest} className="mt-4 space-y-3.5">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Transportadora ou Entregador:</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Transportadora ou Entregador:</label>
                 <input
                   type="text"
                   required
                   placeholder="Ex: Motoboy Express / Braspress / Próprio"
                   value={carrierName}
                   onChange={(e) => setCarrierName(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 text-white rounded-lg focus:border-purple-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Documento / Placa (Opcional):</label>
+                <label className="block text-xs font-medium text-slate-400 mb-1">Documento / Placa (Opcional):</label>
                 <input
                   type="text"
                   placeholder="CPF/CNPJ ou Placa do veículo"
                   value={carrierDocument}
                   onChange={(e) => setCarrierDocument(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg"
+                  className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 text-white rounded-lg focus:border-purple-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Telefone de Contato (Opcional):</label>
+                <label className="block text-xs font-medium text-slate-400 mb-1">Telefone de Contato (Opcional):</label>
                 <input
                   type="text"
                   placeholder="(11) 98888-0000"
                   value={carrierPhone}
                   onChange={(e) => setCarrierPhone(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg"
+                  className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 text-white rounded-lg focus:border-purple-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Instruções / Observações:</label>
+                <label className="block text-xs font-medium text-slate-400 mb-1">Instruções / Observações:</label>
                 <textarea
                   rows={2}
                   placeholder="Entregar na portaria B..."
                   value={manifestNotes}
                   onChange={(e) => setManifestNotes(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg"
+                  className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 text-white rounded-lg focus:border-purple-500 focus:outline-none"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
                 <button
                   type="button"
                   onClick={() => setIsManifestModalOpen(false)}
-                  className="px-4 py-2 text-xs text-slate-600"
+                  className="px-4 py-2 text-xs text-slate-400 hover:text-white"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingManifest || !carrierName.trim()}
-                  className="px-4 py-2 text-xs font-bold text-white bg-purple-600 hover:bg-purple-700 rounded-lg shadow-sm"
+                  className="px-4 py-2 text-xs font-bold text-white bg-purple-600 hover:bg-purple-500 rounded-lg shadow-sm"
                 >
                   {isSubmittingManifest ? "Gerando RD..." : "Emitir Romaneio"}
                 </button>
@@ -720,22 +720,22 @@ export function Sector14ExpedicaoPanel({ currentUser }: Sector14ExpedicaoPanelPr
 
       {/* MODAL 3: VISUALIZAÇÃO / IMPRESSÃO DE ROMANEIO (RD) */}
       {isViewModalOpen && viewingManifest && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto print:p-0 print:bg-white">
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-2xl w-full p-6 my-8 print:border-none print:shadow-none print:p-0">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto print:p-0 print:bg-white">
+          <div className="bg-slate-900 rounded-2xl shadow-2xl border border-slate-800 max-w-2xl w-full p-6 my-8 text-white print:bg-white print:text-black print:border-none print:shadow-none print:p-0">
             {/* Cabeçalho do Romaneio */}
-            <div className="flex items-center justify-between pb-4 border-b border-slate-200">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-800 print:border-slate-300">
               <div>
-                <span className="text-[10px] font-bold tracking-widest text-purple-600 uppercase">PCP Industrial • Fábrica de Uniformes</span>
-                <h2 className="text-xl font-black text-slate-900 mt-0.5">{viewingManifest.manifestNumber}</h2>
-                <p className="text-xs text-slate-500">Romaneio Oficial de Entrega de Produção</p>
+                <span className="text-[10px] font-bold tracking-widest text-purple-400 uppercase print:text-purple-700">PCP Industrial • Fábrica de Uniformes</span>
+                <h2 className="text-xl font-black text-white mt-0.5 print:text-black">{viewingManifest.manifestNumber}</h2>
+                <p className="text-xs text-slate-400 print:text-slate-600">Romaneio Oficial de Entrega de Produção</p>
               </div>
               <div className="text-right">
-                <div className="text-xs text-slate-500">Emissão:</div>
-                <div className="text-xs font-bold text-slate-800">
+                <div className="text-xs text-slate-400 print:text-slate-600">Emissão:</div>
+                <div className="text-xs font-bold text-white print:text-black">
                   {new Date(viewingManifest.createdAt).toLocaleString("pt-BR")}
                 </div>
                 {viewingManifest.reprintCount > 0 && (
-                  <span className="inline-block px-2 py-0.5 text-[10px] rounded bg-amber-50 text-amber-700 font-bold border border-amber-200 mt-1">
+                  <span className="inline-block px-2 py-0.5 text-[10px] rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30 mt-1 print:bg-amber-100 print:text-amber-800">
                     Reimpressão #{viewingManifest.reprintCount}
                   </span>
                 )}
@@ -743,53 +743,53 @@ export function Sector14ExpedicaoPanel({ currentUser }: Sector14ExpedicaoPanelPr
             </div>
 
             {/* Dados do Destinatário e Transporte */}
-            <div className="grid grid-cols-2 gap-4 py-3 border-b border-slate-200 text-xs">
+            <div className="grid grid-cols-2 gap-4 py-3 border-b border-slate-800 print:border-slate-300 text-xs">
               <div>
                 <span className="text-slate-400">Cliente / Destinatário:</span>
-                <div className="font-bold text-slate-800 text-sm mt-0.5">{viewingManifest.customer?.companyName}</div>
-                <div className="text-slate-500">Contato: {viewingManifest.customer?.contactName} ({viewingManifest.customer?.phone})</div>
-                <div className="text-slate-500 mt-1">OP: <strong>{viewingManifest.productionOrder?.opNumber}</strong></div>
+                <div className="font-bold text-white text-sm mt-0.5 print:text-black">{viewingManifest.customer?.companyName}</div>
+                <div className="text-slate-400 print:text-slate-600">Contato: {viewingManifest.customer?.contactName} ({viewingManifest.customer?.phone})</div>
+                <div className="text-slate-400 print:text-slate-600 mt-1">OP: <strong className="text-white print:text-black">{viewingManifest.productionOrder?.opNumber}</strong></div>
               </div>
               <div>
                 <span className="text-slate-400">Transporte / Entrega:</span>
-                <div className="font-bold text-purple-800 text-sm mt-0.5">{viewingManifest.carrierName}</div>
-                {viewingManifest.carrierDocument && <div className="text-slate-500">Doc/Placa: {viewingManifest.carrierDocument}</div>}
-                {viewingManifest.carrierPhone && <div className="text-slate-500">Telefone: {viewingManifest.carrierPhone}</div>}
+                <div className="font-bold text-purple-400 text-sm mt-0.5 print:text-purple-800">{viewingManifest.carrierName}</div>
+                {viewingManifest.carrierDocument && <div className="text-slate-400 print:text-slate-600">Doc/Placa: {viewingManifest.carrierDocument}</div>}
+                {viewingManifest.carrierPhone && <div className="text-slate-400 print:text-slate-600">Telefone: {viewingManifest.carrierPhone}</div>}
               </div>
             </div>
 
             {/* Grade de Volumes */}
-            <div className="py-3 border-b border-slate-200">
-              <h4 className="text-xs font-bold text-slate-700 uppercase mb-2">Volumes Embalados</h4>
+            <div className="py-3 border-b border-slate-800 print:border-slate-300">
+              <h4 className="text-xs font-bold text-slate-300 uppercase mb-2 print:text-black">Volumes Embalados</h4>
               <div className="space-y-1.5 text-xs">
                 {viewingManifest.volumes?.map((v) => (
-                  <div key={v.id} className="flex items-center justify-between p-2 bg-slate-50 rounded border border-slate-200">
+                  <div key={v.id} className="flex items-center justify-between p-2 bg-slate-950 rounded border border-slate-800 print:bg-slate-50 print:border-slate-300">
                     <div>
-                      <span className="font-bold text-slate-800">Vol #{v.volumeNumber}</span>
-                      <span className="text-slate-500 ml-2">({v.quantity} peças)</span>
-                      <span className="font-mono text-[10px] text-slate-400 ml-2">{v.labelQrCode}</span>
+                      <span className="font-bold text-white print:text-black">Vol #{v.volumeNumber}</span>
+                      <span className="text-slate-400 print:text-slate-600 ml-2">({v.quantity} peças)</span>
+                      <span className="font-mono text-[10px] text-slate-500 ml-2">{v.labelQrCode}</span>
                     </div>
-                    {v.weightKg && <span className="text-slate-600 font-medium">{v.weightKg} kg</span>}
+                    {v.weightKg && <span className="text-slate-400 font-medium print:text-slate-600">{v.weightKg} kg</span>}
                   </div>
                 ))}
               </div>
-              <div className="flex justify-between items-center text-xs font-bold text-slate-800 mt-2 px-2">
+              <div className="flex justify-between items-center text-xs font-bold text-white mt-2 px-2 print:text-black">
                 <span>Total de Volumes: {viewingManifest.volumes?.length || 0}</span>
                 <span>Total de Peças: {viewingManifest.totalQuantity} pçs</span>
               </div>
             </div>
 
             {/* Status e Assinatura */}
-            <div className="py-3 border-b border-slate-200 text-xs flex items-center justify-between">
+            <div className="py-3 border-b border-slate-800 print:border-slate-300 text-xs flex items-center justify-between">
               <div>
                 <span className="text-slate-400">Status da Entrega:</span>
                 <div className="font-bold text-sm mt-0.5">
                   {viewingManifest.isDelivered ? (
-                    <span className="text-emerald-600 flex items-center gap-1">
+                    <span className="text-emerald-400 flex items-center gap-1 print:text-emerald-700">
                       <CheckCircle2 className="w-4 h-4" /> Entregue para {viewingManifest.deliveredRecipient}
                     </span>
                   ) : (
-                    <span className="text-blue-600 flex items-center gap-1">
+                    <span className="text-sky-400 flex items-center gap-1 print:text-blue-700">
                       <Clock className="w-4 h-4" /> Em Transporte
                     </span>
                   )}
@@ -807,7 +807,7 @@ export function Sector14ExpedicaoPanel({ currentUser }: Sector14ExpedicaoPanelPr
             <div className="flex items-center justify-between pt-4 print:hidden">
               <button
                 onClick={() => setIsViewModalOpen(false)}
-                className="px-4 py-2 text-xs text-slate-600 hover:text-slate-800"
+                className="px-4 py-2 text-xs text-slate-400 hover:text-white"
               >
                 Fechar
               </button>
@@ -815,7 +815,7 @@ export function Sector14ExpedicaoPanel({ currentUser }: Sector14ExpedicaoPanelPr
                 <button
                   onClick={() => handleReprintManifest(viewingManifest.id)}
                   disabled={isReprinting}
-                  className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
+                  className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg text-slate-300 bg-slate-800 hover:bg-slate-700 transition-colors border border-slate-700"
                 >
                   <Printer className="w-3.5 h-3.5" />
                   {isReprinting ? "Reimprimindo..." : "Imprimir Romaneio"}
@@ -823,7 +823,7 @@ export function Sector14ExpedicaoPanel({ currentUser }: Sector14ExpedicaoPanelPr
                 {!viewingManifest.isDelivered && (
                   <button
                     onClick={() => handleOpenDeliverModal(viewingManifest)}
-                    className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-lg text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm transition-all"
+                    className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-lg text-white bg-emerald-600 hover:bg-emerald-500 shadow-sm transition-all"
                   >
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     Baixar Entrega
@@ -837,42 +837,42 @@ export function Sector14ExpedicaoPanel({ currentUser }: Sector14ExpedicaoPanelPr
 
       {/* MODAL 4: BAIXA DA ENTREGA */}
       {isDeliverModalOpen && manifestToDeliver && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-md w-full p-6">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 rounded-2xl shadow-2xl border border-slate-800 max-w-md w-full p-6 text-white">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                <h3 className="font-bold text-slate-800">Baixa de Entrega — {manifestToDeliver.manifestNumber}</h3>
+                <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                <h3 className="font-bold text-white text-base">Baixa de Entrega — {manifestToDeliver.manifestNumber}</h3>
               </div>
-              <button onClick={() => setIsDeliverModalOpen(false)} className="text-slate-400 hover:text-slate-600 font-bold text-xl">×</button>
+              <button onClick={() => setIsDeliverModalOpen(false)} className="text-slate-400 hover:text-white font-bold text-xl">×</button>
             </div>
 
             <form onSubmit={handleSubmitDeliver} className="mt-4 space-y-3.5">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Nome do Recebedor (Cliente):</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Nome do Recebedor (Cliente):</label>
                 <input
                   type="text"
                   required
                   placeholder="Nome completo de quem recebeu as peças"
                   value={deliveredRecipient}
                   onChange={(e) => setDeliveredRecipient(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 text-white rounded-lg focus:border-emerald-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Observações da Entrega (Opcional):</label>
+                <label className="block text-xs font-medium text-slate-400 mb-1">Observações da Entrega (Opcional):</label>
                 <textarea
                   rows={2}
                   placeholder="Canhoto assinado, entrega sem avarias..."
                   value={deliverNotes}
                   onChange={(e) => setDeliverNotes(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg"
+                  className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 text-white rounded-lg focus:border-emerald-500 focus:outline-none"
                 />
               </div>
 
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
-                <label className="block text-xs font-semibold text-slate-800 mb-1">
+              <div className="p-3 bg-slate-950 rounded-xl border border-slate-800">
+                <label className="block text-xs font-semibold text-slate-200 mb-1">
                   PIN de Assinatura do Expedidor:
                 </label>
                 <input
@@ -882,25 +882,25 @@ export function Sector14ExpedicaoPanel({ currentUser }: Sector14ExpedicaoPanelPr
                   placeholder="PIN de 4 a 6 dígitos"
                   value={deliverPin}
                   onChange={(e) => setDeliverPin(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg tracking-widest focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 text-sm bg-slate-900 border border-slate-700 text-white rounded-lg tracking-widest text-center focus:border-emerald-500 focus:outline-none"
                 />
-                <p className="text-[11px] text-slate-500 mt-1">
+                <p className="text-[11px] text-slate-400 mt-1">
                   Assinatura digital criptografada e verificação de conclusão da OP.
                 </p>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
                 <button
                   type="button"
                   onClick={() => setIsDeliverModalOpen(false)}
-                  className="px-4 py-2 text-xs text-slate-600"
+                  className="px-4 py-2 text-xs text-slate-400 hover:text-white"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingDeliver || !deliveredRecipient.trim() || !deliverPin}
-                  className="px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm"
+                  className="px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg shadow-sm"
                 >
                   {isSubmittingDeliver ? "Confirmando..." : "Confirmar & Baixar Entrega"}
                 </button>

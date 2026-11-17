@@ -52,6 +52,7 @@ async function run() {
     "test/universal-sheet.test.ts",
     "test/designer-workflow.test.ts",
     "test/catalog-and-op-numbering.test.ts",
+    "test/catalog-contract-and-auth.test.ts",
     "test/end-to-end-pipeline.test.ts",
   ];
 

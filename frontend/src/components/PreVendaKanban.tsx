@@ -55,6 +55,8 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
 
   // Catálogo Oficial Labella Sports
   const [catalogProducts, setCatalogProducts] = useState<any[]>([]);
+  const [catalogLoading, setCatalogLoading] = useState(false);
+  const [catalogError, setCatalogError] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
   const [selectedFabric, setSelectedFabric] = useState<string>("");
   const [selectedCollar, setSelectedCollar] = useState<string>("");
@@ -63,6 +65,19 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
     "Nome Individual": false,
     "Número Individual": false,
   });
+
+  const parseOptionsList = (val: any): string[] => {
+    if (Array.isArray(val)) return val;
+    if (typeof val === "string" && val.trim() !== "") {
+      try {
+        const parsed = JSON.parse(val);
+        if (Array.isArray(parsed)) return parsed;
+      } catch {
+        return val.split(",").map((s) => s.trim()).filter(Boolean);
+      }
+    }
+    return [];
+  };
 
   const loadQuotations = async () => {
     setIsLoading(true);
@@ -76,31 +91,46 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
     }
   };
 
+  const loadCatalog = async () => {
+    setCatalogLoading(true);
+    setCatalogError(null);
+    try {
+      const prods: any = await api.getCatalogProducts();
+      const list = Array.isArray(prods) ? prods : prods?.products || [];
+      setCatalogProducts(list);
+      if (list.length > 0) {
+        setSelectedProduct((prev: any) => {
+          const current = prev && list.some((p: any) => p.id === prev.id) ? prev : list[0];
+          const fabrics = parseOptionsList(current.availableFabrics);
+          if (fabrics.length > 0) setSelectedFabric((prevF) => prevF || fabrics[0]);
+          const collars = parseOptionsList(current.availableCollars);
+          if (collars.length > 0) setSelectedCollar((prevC) => prevC || collars[0]);
+          return current;
+        });
+      } else {
+        setSelectedProduct(null);
+      }
+    } catch (err: any) {
+      console.error("Erro ao carregar catálogo:", err);
+      setCatalogError(err.message || "Erro de conexão ao carregar catálogo.");
+    } finally {
+      setCatalogLoading(false);
+    }
+  };
+
   useEffect(() => {
     loadQuotations();
   }, [searchTerm]);
 
   useEffect(() => {
-    api
-      .getCatalogProducts()
-      .then((prods) => {
-        if (Array.isArray(prods)) {
-          setCatalogProducts(prods);
-          if (prods.length > 0) {
-            setSelectedProduct(prods[0]);
-            try {
-              const fabrics = JSON.parse(prods[0].availableFabrics || "[]");
-              if (fabrics.length > 0) setSelectedFabric(fabrics[0]);
-              const collars = JSON.parse(prods[0].availableCollars || "[]");
-              if (collars.length > 0) setSelectedCollar(collars[0]);
-            } catch {
-              // ignore
-            }
-          }
-        }
-      })
-      .catch((err) => console.error("Erro ao carregar catálogo:", err));
+    loadCatalog();
   }, []);
+
+  useEffect(() => {
+    if (isModalOpen && catalogProducts.length === 0) {
+      loadCatalog();
+    }
+  }, [isModalOpen, catalogProducts.length]);
 
   // Recálculo dinâmico seguro do orçamento
   useEffect(() => {
@@ -138,15 +168,10 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
     const prod = catalogProducts.find((p) => p.id === productId);
     if (prod) {
       setSelectedProduct(prod);
-      try {
-        const fabrics = JSON.parse(prod.availableFabrics || "[]");
-        setSelectedFabric(fabrics.length > 0 ? fabrics[0] : "");
-        const collars = JSON.parse(prod.availableCollars || "[]");
-        setSelectedCollar(collars.length > 0 ? collars[0] : "");
-      } catch {
-        setSelectedFabric("");
-        setSelectedCollar("");
-      }
+      const fabrics = parseOptionsList(prod.availableFabrics);
+      setSelectedFabric(fabrics.length > 0 ? fabrics[0] : "");
+      const collars = parseOptionsList(prod.availableCollars);
+      setSelectedCollar(collars.length > 0 ? collars[0] : "");
     }
   };
 
@@ -447,23 +472,65 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
                   <span className="text-xs font-bold text-sky-400 uppercase tracking-wider">
                     Catálogo Oficial Labella Sports
                   </span>
-                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-sky-900/60 text-sky-300">
-                    Pedido Mínimo: 10 peças
-                  </span>
+                  <div className="flex items-center gap-2">
+                    {catalogLoading && (
+                      <span className="text-[11px] text-sky-400 animate-pulse">
+                        Carregando...
+                      </span>
+                    )}
+                    <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-sky-900/60 text-sky-300">
+                      Pedido Mínimo: 10 peças
+                    </span>
+                  </div>
                 </div>
+
+                {catalogError && (
+                  <div className="flex items-center justify-between p-2.5 rounded-lg bg-rose-500/20 border border-rose-500/40 text-xs text-rose-300">
+                    <span>{catalogError}</span>
+                    <button
+                      type="button"
+                      onClick={loadCatalog}
+                      className="px-2.5 py-1 rounded bg-rose-600 hover:bg-rose-500 text-white font-medium text-[11px] transition shadow"
+                    >
+                      Tentar Novamente
+                    </button>
+                  </div>
+                )}
+
+                {!catalogLoading && !catalogError && catalogProducts.length === 0 && (
+                  <div className="flex items-center justify-between p-2.5 rounded-lg bg-amber-500/20 border border-amber-500/40 text-xs text-amber-300">
+                    <span>Nenhum produto cadastrado no catálogo oficial.</span>
+                    <button
+                      type="button"
+                      onClick={loadCatalog}
+                      className="px-2.5 py-1 rounded bg-amber-600 hover:bg-amber-500 text-white font-medium text-[11px] transition shadow"
+                    >
+                      Recarregar
+                    </button>
+                  </div>
+                )}
 
                 <div>
                   <label className="text-xs text-slate-300 font-medium">Modelo do Catálogo</label>
                   <select
                     value={selectedProduct?.id || ""}
                     onChange={(e) => handleSelectProduct(e.target.value)}
-                    className="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-sm text-white focus:border-sky-500 focus:outline-none"
+                    disabled={catalogLoading || catalogProducts.length === 0}
+                    className="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-sm text-white focus:border-sky-500 focus:outline-none disabled:opacity-50"
                   >
-                    {catalogProducts.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.name} — R$ {p.basePrice.toFixed(2)} (Ref: {p.code})
-                      </option>
-                    ))}
+                    {catalogLoading ? (
+                      <option value="" className="bg-slate-900 text-slate-400">Carregando catálogo oficial...</option>
+                    ) : catalogError ? (
+                      <option value="" className="bg-slate-900 text-rose-400">Erro ao carregar catálogo</option>
+                    ) : catalogProducts.length === 0 ? (
+                      <option value="" className="bg-slate-900 text-slate-400">Nenhum produto disponível</option>
+                    ) : (
+                      catalogProducts.map((p) => (
+                        <option key={p.id} value={p.id} className="bg-slate-900 text-white">
+                          {p.name} — R$ {p.basePrice.toFixed(2)} (Ref: {p.code})
+                        </option>
+                      ))
+                    )}
                   </select>
                 </div>
 
@@ -478,16 +545,16 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
                         className="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-xs text-white focus:border-sky-500 focus:outline-none"
                       >
                         {(() => {
-                          try {
-                            const list = JSON.parse(selectedProduct.availableFabrics || "[]");
-                            return list.map((f: string) => (
-                              <option key={f} value={f}>
+                          const list = parseOptionsList(selectedProduct.availableFabrics);
+                          return list.length > 0 ? (
+                            list.map((f: string) => (
+                              <option key={f} value={f} className="bg-slate-900 text-white">
                                 {f}
                               </option>
-                            ));
-                          } catch {
-                            return <option value="">Padrão</option>;
-                          }
+                            ))
+                          ) : (
+                            <option value="" className="bg-slate-900 text-white">Padrão Oficial</option>
+                          );
                         })()}
                       </select>
                     </div>
@@ -501,16 +568,16 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
                         className="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-xs text-white focus:border-sky-500 focus:outline-none"
                       >
                         {(() => {
-                          try {
-                            const list = JSON.parse(selectedProduct.availableCollars || "[]");
-                            return list.map((c: string) => (
-                              <option key={c} value={c}>
+                          const list = parseOptionsList(selectedProduct.availableCollars);
+                          return list.length > 0 ? (
+                            list.map((c: string) => (
+                              <option key={c} value={c} className="bg-slate-900 text-white">
                                 {c}
                               </option>
-                            ));
-                          } catch {
-                            return <option value="">Padrão</option>;
-                          }
+                            ))
+                          ) : (
+                            <option value="" className="bg-slate-900 text-white">Padrão Oficial</option>
+                          );
                         })()}
                       </select>
                     </div>

@@ -282,21 +282,31 @@ export const api = {
     request<any>(`/dashboard/overview?period=${encodeURIComponent(period)}`),
 
   // Catálogo Oficial Labella Sports & Orçamentos Inteligentes
-  getCatalogCategories: () => request<any[]>("/catalog/categories"),
+  getCatalogCategories: () =>
+    request<any>("/catalog/categories").then((res: any) =>
+      Array.isArray(res) ? res : res?.categories || []
+    ),
   getCatalogProducts: (categoryId?: string, search?: string) => {
     const params = new URLSearchParams();
     if (categoryId) params.append("categoryId", categoryId);
     if (search) params.append("search", search);
     const qs = params.toString();
-    return request<any[]>(`/catalog/products${qs ? `?${qs}` : ""}`);
+    return request<any>(`/catalog/products${qs ? `?${qs}` : ""}`).then((res: any) =>
+      Array.isArray(res) ? res : res?.products || []
+    );
   },
   getCatalogProduct: (id: string) =>
-    request<any>(`/catalog/products/${encodeURIComponent(id)}`),
+    request<any>(`/catalog/products/${encodeURIComponent(id)}`).then((res: any) =>
+      res?.product || res
+    ),
   calculateCatalogBudget: (data: {
     items: Array<{
-      productId: string;
+      productId?: string;
+      catalogProductId?: string;
       quantity: number;
-      customizations?: Array<{ name: string; additionalPrice: number; quantity?: number }>;
+      fabricType?: string;
+      collarType?: string;
+      customizations?: Array<string | { name: string; additionalPrice: number; quantity?: number }>;
     }>;
     discountAmount?: number;
   }) =>

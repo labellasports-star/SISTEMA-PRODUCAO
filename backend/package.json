@@ -14,6 +14,8 @@
     "prisma:seed": "tsx prisma/seed.ts",
     "db:init:prod": "tsx scripts/init-production-db.ts",
     "backup": "tsx scripts/backup.ts",
+    "backup:verify": "tsx scripts/verify-backup.ts",
+    "backup:restore": "tsx scripts/restore.ts",
     "test": "tsx test/run-all-tests.ts"
   },
   "keywords": [
