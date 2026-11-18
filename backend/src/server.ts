@@ -35,6 +35,10 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
+// Timeout expandido para permitir uploads de arquivos pesados (até 3GB)
+server.timeout = 30 * 60 * 1000; // 30 minutos
+server.keepAliveTimeout = 65000;
+
 // Configuração do Socket.io para comunicação em tempo real no chão de fábrica
 export const io = new SocketIOServer(server, {
   cors: {

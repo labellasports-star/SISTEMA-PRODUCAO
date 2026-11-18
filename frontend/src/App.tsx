@@ -453,7 +453,10 @@ export function App() {
               <div className="grid grid-cols-2 gap-1.5 text-xs max-h-60 overflow-y-auto pr-1">
                 <button
                   type="button"
-                  onClick={() => setEmailInput("admin@fabrica.com")}
+                  onClick={() => {
+                    setEmailInput("admin@fabrica.com");
+                    setPasswordInput("admin123");
+                  }}
                   className="p-2 rounded-lg bg-slate-900/80 hover:bg-slate-700/80 text-left border border-slate-700/70 flex flex-col transition"
                 >
                   <span className="font-bold text-purple-400">👑 Administrador</span>
@@ -461,7 +464,10 @@ export function App() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setEmailInput("gestor@fabrica.com")}
+                  onClick={() => {
+                    setEmailInput("gestor@fabrica.com");
+                    setPasswordInput("senhaSegura123");
+                  }}
                   className="p-2 rounded-lg bg-slate-900/80 hover:bg-slate-700/80 text-left border border-slate-700/70 flex flex-col transition"
                 >
                   <span className="font-bold text-amber-400">👔 Gestor Geral</span>
@@ -469,7 +475,10 @@ export function App() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setEmailInput("vendedor@fabrica.com")}
+                  onClick={() => {
+                    setEmailInput("vendedor@fabrica.com");
+                    setPasswordInput("senhaSegura123");
+                  }}
                   className="p-2 rounded-lg bg-slate-900/80 hover:bg-slate-700/80 text-left border border-slate-700/70 flex flex-col transition"
                 >
                   <span className="font-bold text-emerald-400">💼 Vendedor (01/03)</span>
@@ -477,7 +486,10 @@ export function App() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setEmailInput("designer@fabrica.com")}
+                  onClick={() => {
+                    setEmailInput("designer@fabrica.com");
+                    setPasswordInput("senhaSegura123");
+                  }}
                   className="p-2 rounded-lg bg-slate-900/80 hover:bg-slate-700/80 text-left border border-slate-700/70 flex flex-col transition"
                 >
                   <span className="font-bold text-pink-400">🎨 Designer (02)</span>
@@ -485,7 +497,10 @@ export function App() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setEmailInput("sac@fabrica.com")}
+                  onClick={() => {
+                    setEmailInput("sac@fabrica.com");
+                    setPasswordInput("senhaSegura123");
+                  }}
                   className="p-2 rounded-lg bg-slate-900/80 hover:bg-slate-700/80 text-left border border-slate-700/70 flex flex-col transition"
                 >
                   <span className="font-bold text-amber-400">🛡️ SAC Interno (04)</span>
@@ -493,7 +508,10 @@ export function App() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setEmailInput("prediag@fabrica.com")}
+                  onClick={() => {
+                    setEmailInput("prediag@fabrica.com");
+                    setPasswordInput("senhaSegura123");
+                  }}
                   className="p-2 rounded-lg bg-slate-900/80 hover:bg-slate-700/80 text-left border border-slate-700/70 flex flex-col transition"
                 >
                   <span className="font-bold text-sky-400">📐 Pré-Diag (05)</span>
@@ -501,7 +519,10 @@ export function App() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setEmailInput("diagramacao@fabrica.com")}
+                  onClick={() => {
+                    setEmailInput("diagramacao@fabrica.com");
+                    setPasswordInput("senhaSegura123");
+                  }}
                   className="p-2 rounded-lg bg-slate-900/80 hover:bg-slate-700/80 text-left border border-slate-700/70 flex flex-col transition"
                 >
                   <span className="font-bold text-indigo-400">📄 Diagramação (06)</span>
@@ -509,7 +530,10 @@ export function App() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setEmailInput("impressao@fabrica.com")}
+                  onClick={() => {
+                    setEmailInput("impressao@fabrica.com");
+                    setPasswordInput("senhaSegura123");
+                  }}
                   className="p-2 rounded-lg bg-slate-900/80 hover:bg-slate-700/80 text-left border border-slate-700/70 flex flex-col transition"
                 >
                   <span className="font-bold text-blue-400">🖨️ Impressão (07)</span>
@@ -517,7 +541,10 @@ export function App() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setEmailInput("infesto@fabrica.com")}
+                  onClick={() => {
+                    setEmailInput("infesto@fabrica.com");
+                    setPasswordInput("senhaSegura123");
+                  }}
                   className="p-2 rounded-lg bg-slate-900/80 hover:bg-slate-700/80 text-left border border-slate-700/70 flex flex-col transition"
                 >
                   <span className="font-bold text-teal-400">✂️ Infesto (08)</span>
@@ -525,7 +552,10 @@ export function App() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setEmailInput("calandra@fabrica.com")}
+                  onClick={() => {
+                    setEmailInput("calandra@fabrica.com");
+                    setPasswordInput("senhaSegura123");
+                  }}
                   className="p-2 rounded-lg bg-slate-900/80 hover:bg-slate-700/80 text-left border border-slate-700/70 flex flex-col transition"
                 >
                   <span className="font-bold text-amber-500">🔥 Calandra (09)</span>

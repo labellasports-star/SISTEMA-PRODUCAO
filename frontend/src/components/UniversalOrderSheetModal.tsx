@@ -55,6 +55,14 @@ export function UniversalOrderSheetModal({
   const [subdivideError, setSubdivideError] = useState("");
   const [isSubdividing, setIsSubdividing] = useState(false);
 
+  const formatFileSize = (bytes?: number): string => {
+    if (!bytes || bytes === 0) return "";
+    const k = 1024;
+    const sizes = ["B", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
+  };
+
   const openSubdivideModal = () => {
     const total = sheet?.totalQuantityOrdered || 0;
     const parts = 2;
@@ -274,24 +282,29 @@ export function UniversalOrderSheetModal({
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                     <div className="rounded-xl bg-slate-950/60 p-3.5 border border-slate-800">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-                        Cliente
+                        Cliente / Contato
                       </span>
                       <strong className="text-sm text-white font-semibold block truncate">
                         {sheet.customer?.companyName || "N/A"}
                       </strong>
-                      <span className="text-xs text-slate-400">{sheet.customer?.contactName}</span>
+                      <span className="text-xs text-slate-400 block">{sheet.customer?.contactName}</span>
+                      {sheet.customer?.phone && (
+                        <span className="text-[11px] text-sky-400 font-mono block mt-0.5">
+                          {sheet.customer.phone}
+                        </span>
+                      )}
                     </div>
 
                     <div className="rounded-xl bg-slate-950/60 p-3.5 border border-slate-800">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-                        Total de Peças
+                        Time / Equipe / Qtd
                       </span>
-                      <strong className="text-xl text-sky-400 font-extrabold block">
+                      <strong className="text-sm text-white font-semibold block truncate">
+                        {sheet.quotation?.teamName || sheet.title || "Equipe"}
+                      </strong>
+                      <strong className="text-lg text-sky-400 font-extrabold block">
                         {sheet.totalQuantityOrdered || sheet.totalQuantity || 0} pcs
                       </strong>
-                      <span className="text-xs text-slate-400">
-                        {sheet.productType || "Uniformes Personalizados"}
-                      </span>
                     </div>
 
                     <div className="rounded-xl bg-slate-950/60 p-3.5 border border-slate-800">
@@ -319,6 +332,68 @@ export function UniversalOrderSheetModal({
                       </p>
                     </div>
                   </div>
+
+                  {/* Especificações do Modelo e Opcionais */}
+                  {items.length > 0 && (() => {
+                    const item = items[0];
+                    return (
+                      <div className="rounded-xl bg-slate-950/70 p-4 border border-slate-800 space-y-3">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-sky-400 flex items-center gap-1.5">
+                          <Tag className="h-3.5 w-3.5" />
+                          Especificações Técnicas do Modelo
+                        </h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                          <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                            <span className="text-slate-400 block mb-0.5">Modelo</span>
+                            <strong className="text-white">
+                              {item.isCustomModel
+                                ? `Outros: ${item.customModelName || item.productModel}`
+                                : item.productModel}
+                            </strong>
+                          </div>
+                          <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                            <span className="text-slate-400 block mb-0.5">Tecido Recomendado</span>
+                            <strong className="text-white">
+                              {item.isCustomFabric
+                                ? `Outros: ${item.customFabricName || item.fabricType}`
+                                : item.fabricType || "Dry Fit Padrão"}
+                            </strong>
+                          </div>
+                          <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                            <span className="text-slate-400 block mb-0.5">Tipo de Gola</span>
+                            <strong className="text-white">
+                              {item.isCustomCollar
+                                ? `Outros: ${item.customCollarName || item.collarType}`
+                                : item.collarType || "Gola Careca"}
+                            </strong>
+                          </div>
+                        </div>
+
+                        {item.customizationNotes && (
+                          <div className="text-xs">
+                            <span className="text-slate-400 block mb-1">Opcionais e Personalizações:</span>
+                            <div className="flex flex-wrap gap-1.5">
+                              {item.customizationNotes.split(",").map((c: string, idx: number) => (
+                                <span
+                                  key={idx}
+                                  className="px-2 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-800 font-medium text-[11px]"
+                                >
+                                  {c.trim()}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {(sheet.productsSummary || sheet.quotation?.productsSummary) && (
+                          <div className="text-xs text-slate-300 pt-1">
+                            <strong className="text-slate-400">Produtos Solicitados: </strong>
+                            <span>{sheet.productsSummary || sheet.quotation?.productsSummary}</span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
 
                   {/* Alerta de Retrabalho se houver */}
                   {sheet.totalQuantityRework > 0 && (
@@ -464,10 +539,10 @@ export function UniversalOrderSheetModal({
                         {approvedArtwork.previewUrl && (
                           <div className="relative group rounded-xl overflow-hidden bg-slate-950 border border-slate-800 flex items-center justify-center max-h-[220px]">
                             <img
-                              src={approvedArtwork.previewUrl}
+                              src={api.getAuthenticatedFileUrl(approvedArtwork.previewUrl)}
                               alt="Mockup Oficial Aprovado"
                               className="object-contain max-h-[200px] w-full cursor-pointer hover:scale-105 transition"
-                              onClick={() => setSelectedImage(approvedArtwork.previewUrl)}
+                              onClick={() => setSelectedImage(api.getAuthenticatedFileUrl(approvedArtwork.previewUrl))}
                             />
                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition pointer-events-none">
                               <span className="text-xs text-white bg-black/70 px-2 py-1 rounded">Clique para ampliar</span>
@@ -488,7 +563,7 @@ export function UniversalOrderSheetModal({
                           <div className="pt-2 flex flex-wrap gap-2">
                             {approvedArtwork.previewUrl && (
                               <a
-                                href={approvedArtwork.previewUrl}
+                                href={api.getAuthenticatedFileUrl(approvedArtwork.previewUrl)}
                                 target="_blank"
                                 rel="noreferrer"
                                 className="inline-flex items-center gap-1 rounded-lg bg-slate-800 hover:bg-slate-700 px-3 py-1.5 text-xs text-sky-400 font-semibold border border-slate-700 transition"
@@ -497,13 +572,13 @@ export function UniversalOrderSheetModal({
                               </a>
                             )}
                             {approvedArtwork.vectorUrl && (
-                              <a
-                                href={approvedArtwork.vectorUrl}
-                                download
+                              <button
+                                type="button"
+                                onClick={() => api.downloadFile(approvedArtwork.vectorUrl)}
                                 className="inline-flex items-center gap-1 rounded-lg bg-emerald-700 hover:bg-emerald-600 px-3 py-1.5 text-xs text-white font-semibold shadow transition"
                               >
                                 <Download className="h-3.5 w-3.5" /> Baixar Vetor
-                              </a>
+                              </button>
                             )}
                           </div>
                         </div>
@@ -516,33 +591,83 @@ export function UniversalOrderSheetModal({
                     </div>
                   )}
 
-                  {/* Galeria de Imagens de Referência trazidas pelo cliente */}
+                  {/* Galeria de Arquivos e Referências do Pedido */}
                   <div>
                     <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300 mb-3 flex items-center gap-2">
                       <ImageIcon className="h-4 w-4 text-sky-400" />
-                      Imagens de Referência do Cliente ({references.length})
+                      Arquivos e Referências Anexadas ({references.length})
                     </h4>
                     {references.length > 0 ? (
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        {references.map((ref: any, idx: number) => (
-                          <div
-                            key={ref.id || idx}
-                            className="group relative rounded-xl overflow-hidden bg-slate-950 border border-slate-800 hover:border-slate-700 transition"
-                          >
-                            <img
-                              src={ref.fileUrl}
-                              alt={ref.fileName}
-                              className="h-28 w-full object-cover cursor-pointer group-hover:scale-105 transition"
-                              onClick={() => setSelectedImage(ref.fileUrl)}
-                            />
-                            <div className="p-2 text-[11px] truncate text-slate-300" title={ref.fileName}>
-                              {ref.fileName}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {references.map((ref: any, idx: number) => {
+                          const ext = (ref.fileName || "").split(".").pop()?.toLowerCase() || "";
+                          const isImage = ["png", "jpg", "jpeg", "webp", "gif"].includes(ext);
+                          return (
+                            <div
+                              key={ref.id || idx}
+                              className="rounded-xl overflow-hidden bg-slate-950 border border-slate-800 hover:border-slate-700 transition flex flex-col justify-between p-3"
+                            >
+                              <div className="flex items-center gap-2 mb-2">
+                                {isImage ? (
+                                  <div
+                                    className="h-12 w-12 rounded-lg bg-slate-900 border border-slate-800 overflow-hidden shrink-0 cursor-pointer flex items-center justify-center"
+                                    onClick={() => setSelectedImage(api.getAuthenticatedFileUrl(ref.fileUrl))}
+                                  >
+                                    <img
+                                      src={api.getAuthenticatedFileUrl(ref.fileUrl)}
+                                      alt={ref.fileName}
+                                      className="h-full w-full object-cover"
+                                    />
+                                  </div>
+                                ) : (
+                                  <div className="h-12 w-12 rounded-lg bg-sky-950/60 border border-sky-800 flex flex-col items-center justify-center shrink-0">
+                                    <FileText className="h-5 w-5 text-sky-400" />
+                                    <span className="text-[9px] font-bold text-sky-300 uppercase mt-0.5">
+                                      {ext || "ARQ"}
+                                    </span>
+                                  </div>
+                                )}
+                                <div className="truncate flex-1">
+                                  <span
+                                    className="text-xs font-medium text-slate-200 block truncate"
+                                    title={ref.originalName || ref.fileName}
+                                  >
+                                    {ref.originalName || ref.fileName}
+                                  </span>
+                                  <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-mono">
+                                    <span className="uppercase">{ref.fileExtension || ext}</span>
+                                    {ref.fileSize && (
+                                      <span>· {formatFileSize(ref.fileSize)}</span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center justify-between pt-2 border-t border-slate-900">
+                                {isImage && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setSelectedImage(api.getAuthenticatedFileUrl(ref.fileUrl))}
+                                    className="text-[11px] text-slate-400 hover:text-white flex items-center gap-1"
+                                  >
+                                    <Eye className="h-3 w-3 text-sky-400" /> Visualizar
+                                  </button>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={() => api.downloadFile(ref.fileUrl, ref.originalName || ref.fileName)}
+                                  className="ml-auto inline-flex items-center gap-1 rounded bg-sky-950 hover:bg-sky-900 border border-sky-800 px-2.5 py-1 text-[11px] font-semibold text-sky-300 transition"
+                                  title="Baixar arquivo original"
+                                >
+                                  <Download className="h-3 w-3" /> Baixar
+                                </button>
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     ) : (
-                      <p className="text-xs text-slate-500 italic">Nenhuma imagem de referência anexada pelo cliente.</p>
+                      <p className="text-xs text-slate-500 italic">Nenhum arquivo de referência anexado.</p>
                     )}
                   </div>
 
@@ -594,6 +719,16 @@ export function UniversalOrderSheetModal({
                                 title="Visualizar"
                               >
                                 <Eye className="h-4 w-4" />
+                              </button>
+                            )}
+                            {ver.previewUrl && (
+                              <button
+                                type="button"
+                                onClick={() => api.downloadFile(ver.previewUrl, `arte-v${ver.versionNumber}-${sheet?.opNumber || sheet?.quotation?.quotationNumber || "arte"}.png`)}
+                                className="text-emerald-400 hover:text-emerald-300 p-1"
+                                title="Baixar arte original"
+                              >
+                                <Download className="h-4 w-4" />
                               </button>
                             )}
                           </div>

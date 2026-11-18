@@ -55,6 +55,8 @@ model User {
   // Relações do Módulo Comercial e SAC (Etapa 2)
   sellerQuotations        Quotation[]           @relation("SellerQuotations")
   designerQuotations      Quotation[]           @relation("DesignerQuotations")
+  minQtyAuthorizations    Quotation[]           @relation("MinQtyAuthorizations")
+  minQtyRequests          Quotation[]           @relation("MinQtyRequests")
   customersSold           Customer[]            @relation("CustomerSeller")
   uploadedAttachments     QuotationAttachment[] @relation("UserUploadedAttachments")
   createdArtworkVersions  ArtworkVersion[]      @relation("UserCreatedArtworkVersions")
@@ -159,6 +161,14 @@ model Quotation {
   artworkApprovedBy     String?               // Nome ou contato do cliente que autorizou
   artworkApprovalNotes  String?
 
+  // Autorização por PIN para vendas abaixo de 10 peças
+  minQtyAuthorizedById    String?
+  minQtyAuthorizedBy      User?                 @relation("MinQtyAuthorizations", fields: [minQtyAuthorizedById], references: [id])
+  minQtyAuthorizedAt      DateTime?
+  minQtyApprovedQuantity  Int?
+  minQtyRequestedById     String?
+  minQtyRequestedBy       User?                 @relation("MinQtyRequests", fields: [minQtyRequestedById], references: [id])
+
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
 
@@ -188,6 +198,12 @@ model QuotationItem {
   fabricType          String?    // Ex: "Cacharrel Dry 100% Poliéster"
   collarType          String?    // Ex: "Gola Polo", "Gola V", "Gola Redonda"
   customizationNotes  String?    // Ex: "Aplicação TPU 3D", "Patrocínio frontal"
+  isCustomModel       Boolean    @default(false)
+  customModelName     String?
+  isCustomFabric      Boolean    @default(false)
+  customFabricName    String?
+  isCustomCollar      Boolean    @default(false)
+  customCollarName    String?
   createdAt           DateTime   @default(now())
 }
 
@@ -199,6 +215,7 @@ model QuotationAttachment {
   quotationId     String
   quotation       Quotation  @relation(fields: [quotationId], references: [id], onDelete: Cascade)
   fileName        String
+  originalName    String?
   fileType        String     // REFERENCE, ARTWORK_PREVIEW, ARTWORK_VECTOR, CLIENT_PROOF
   fileExtension   String     // PNG, JPG, PDF, PSD, CDR, AI
   fileSize        Int?       // Bytes

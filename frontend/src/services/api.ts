@@ -130,15 +130,24 @@ export const api = {
       method: "POST",
       body: JSON.stringify(quotationData),
     }),
+  updateQuotation: (id: string, quotationData: any) =>
+    request<any>(`/quotations/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(quotationData),
+    }),
   updateQuotationStatus: (id: string, data: { status: string; notes?: string; rejectionReason?: string }) =>
     request<any>(`/quotations/${id}/status`, {
       method: "PUT",
       body: JSON.stringify(data),
     }),
-  attachQuotationFile: (id: string, fileData: { fileName: string; fileType: string; fileUrl: string; fileSize?: number }) =>
+  attachQuotationFile: (id: string, fileData: { fileName: string; fileType: string; fileUrl: string; fileSize?: number; originalName?: string }) =>
     request<any>(`/quotations/${id}/attachments`, {
       method: "POST",
       body: JSON.stringify(fileData),
+    }),
+  deleteQuotationAttachment: (id: string, attachmentId: string) =>
+    request<any>(`/quotations/${id}/attachments/${attachmentId}`, {
+      method: "DELETE",
     }),
 
   // Design
@@ -153,7 +162,53 @@ export const api = {
       body: JSON.stringify(versionData),
     }),
 
-  // Uploads Seguros com FormData
+  // Uploads Seguros com FormData e suporte a progresso
+  uploadReferenceFileWithProgress: (
+    file: File,
+    onProgress?: (progressPercent: number) => void
+  ): Promise<any> => {
+    return new Promise((resolve, reject) => {
+      const token = getToken();
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", `${API_URL}/files/upload/references`);
+
+      if (token) {
+        xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+      }
+
+      if (xhr.upload && onProgress) {
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            const percent = Math.round((event.loaded / event.total) * 100);
+            onProgress(percent);
+          }
+        };
+      }
+
+      xhr.onload = () => {
+        try {
+          const response = JSON.parse(xhr.responseText || "{}");
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(response);
+          } else {
+            reject(new Error(response.error || `Erro ${xhr.status} no upload.`));
+          }
+        } catch (e: any) {
+          reject(new Error("Resposta inválida do servidor durante upload."));
+        }
+      };
+
+      xhr.onerror = () => {
+        reject(new Error("Erro de conexão ao enviar arquivo. Verifique sua rede."));
+      };
+
+      xhr.send(formData);
+    });
+  },
+
   uploadReferenceFile: async (file: File) => {
     const token = getToken();
     const formData = new FormData();
@@ -332,4 +387,86 @@ export const api = {
       method: "POST",
       body: JSON.stringify(data),
     }),
+
+  // Autorização Gerencial por PIN (< 10 peças)
+  getEligibleManagers: () =>
+    request<Array<{ id: string; name: string; email: string; role: string }>>("/quotations/eligible-managers"),
+
+  verifyManagerPin: (pin: string, managerId?: string) =>
+    request<{ success: boolean; manager: { id: string; name: string; role: string } }>("/quotations/verify-manager-pin", {
+      method: "POST",
+      body: JSON.stringify({ pin, managerId }),
+    }),
+
+  // Obter URL autenticada com token para tags <img> e previews seguros
+  getAuthenticatedFileUrl: (fileUrl: string): string => {
+    if (!fileUrl) return "";
+    const token = getToken();
+    let cleanUrl = fileUrl.trim();
+    if (!cleanUrl.startsWith("http://") && !cleanUrl.startsWith("https://")) {
+      if (!cleanUrl.startsWith("/")) {
+        cleanUrl = `/${cleanUrl}`;
+      }
+    }
+    const separator = cleanUrl.includes("?") ? "&" : "?";
+    const withToken = token && !cleanUrl.includes("token=")
+      ? `${cleanUrl}${separator}token=${encodeURIComponent(token)}`
+      : cleanUrl;
+    const inlineSep = withToken.includes("?") ? "&" : "?";
+    return withToken.includes("inline=") ? withToken : `${withToken}${inlineSep}inline=1`;
+  },
+
+  // Download seguro de anexos com streaming no navegador e preservação de permissões
+  downloadFile: async (fileUrl: string, originalName?: string) => {
+    if (!fileUrl) return;
+    const token = getToken();
+
+    let cleanUrl = fileUrl.trim();
+    if (!cleanUrl.startsWith("http://") && !cleanUrl.startsWith("https://")) {
+      if (!cleanUrl.startsWith("/")) {
+        cleanUrl = `/${cleanUrl}`;
+      }
+    }
+
+    const separator = cleanUrl.includes("?") ? "&" : "?";
+    const authenticatedUrl = token ? `${cleanUrl}${separator}token=${encodeURIComponent(token)}` : cleanUrl;
+
+    try {
+      const checkRes = await fetch(authenticatedUrl, {
+        method: "HEAD",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      if (!checkRes.ok) {
+        if (checkRes.status === 401) {
+          alert("Sessão expirada ou não autenticada. Faça login novamente.");
+          return;
+        }
+        if (checkRes.status === 403) {
+          alert("Acesso negado: Você não possui autorização para baixar este anexo.");
+          return;
+        }
+        if (checkRes.status === 404) {
+          alert("Arquivo não encontrado no servidor de armazenamento.");
+          return;
+        }
+        const errText = await checkRes.text().catch(() => "");
+        alert(`Erro ao baixar arquivo (${checkRes.status}): ${errText || "Falha na requisição."}`);
+        return;
+      }
+    } catch (e: any) {
+      console.warn("Pré-validação de download indisponível ou ignorada:", e);
+    }
+
+    const link = document.createElement("a");
+    link.href = authenticatedUrl;
+    if (originalName) {
+      link.download = originalName;
+    } else {
+      link.setAttribute("download", "");
+    }
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  },
 };

@@ -31,8 +31,15 @@ approvalRouter.post(
         where: { id },
         include: {
           customer: true,
+          designer: { select: { id: true, name: true } },
           designBrief: {
-            include: { versions: { orderBy: { versionNumber: "desc" }, take: 1 } },
+            include: {
+              versions: {
+                orderBy: { versionNumber: "desc" },
+                take: 1,
+                include: { designer: { select: { id: true, name: true } } },
+              },
+            },
           },
         },
       });
@@ -42,29 +49,47 @@ approvalRouter.post(
         return;
       }
 
+      // Validação de isolamento horizontal: apenas o vendedor responsável ou gestão/admin podem decidir
+      if (req.user!.role === "VENDEDOR" && quotation.sellerId !== req.user!.id) {
+        res.status(403).json({
+          error: "Acesso negado: Você não é o vendedor responsável por esta ficha.",
+        });
+        return;
+      }
+
+      // Validação de máquina de estados: apenas em AGUARDANDO_APROVACAO_ARTE
+      if (quotation.status !== "AGUARDANDO_APROVACAO_ARTE") {
+        res.status(400).json({
+          error: `Transição inválida: A ficha está no status '${quotation.status}', mas deve estar em 'AGUARDANDO_APROVACAO_ARTE' para registrar a decisão do cliente.`,
+        });
+        return;
+      }
+
       const { decision, approvedByPerson, feedbackNotes } = parseResult.data;
       const latestVersion = quotation.designBrief?.versions[0];
 
-      if (decision === "APPROVED") {
-        if (!latestVersion) {
-          res.status(400).json({
-            error: "Não é possível aprovar a arte sem que o designer tenha anexado ao menos uma versão final.",
-          });
-          return;
-        }
+      if (!latestVersion) {
+        res.status(400).json({
+          error: "Não é possível decidir sobre a arte sem que o designer tenha anexado ao menos uma versão.",
+        });
+        return;
+      }
 
+      if (decision === "APPROVED") {
         // Marcar versão como aprovada
         await prisma.artworkVersion.update({
           where: { id: latestVersion.id },
           data: { status: "APPROVED" },
         });
 
+        const approverName = approvedByPerson || quotation.customer?.contactName || "Cliente";
+
         const updated = await prisma.quotation.update({
           where: { id },
           data: {
             isArtworkApproved: true,
             artworkApprovalDate: new Date(),
-            artworkApprovedBy: approvedByPerson || quotation.customer.contactName,
+            artworkApprovedBy: approverName,
             artworkApprovalNotes: feedbackNotes,
             status: "ORCAMENTO_APROVADO",
             timeline: {
@@ -72,7 +97,7 @@ approvalRouter.post(
                 fromStatus: quotation.status,
                 toStatus: "ORCAMENTO_APROVADO",
                 userId: req.user!.id,
-                notes: `Arte aprovada pelo cliente (${approvedByPerson || "Cliente"}). Parecer: ${feedbackNotes}`,
+                notes: `Arte (v${latestVersion.versionNumber}) aprovada pelo cliente (${approverName}). Parecer: ${feedbackNotes}`,
               },
             },
           },
@@ -83,7 +108,12 @@ approvalRouter.post(
           action: "ARTWORK_APPROVED_BY_CLIENT",
           entityName: "Quotation",
           entityId: id,
-          newValues: { isArtworkApproved: true, approvedBy: approvedByPerson },
+          newValues: {
+            versionNumber: latestVersion.versionNumber,
+            isArtworkApproved: true,
+            approvedBy: approverName,
+            feedbackNotes,
+          },
           ipAddress: req.ip,
           userAgent: req.headers["user-agent"],
         });
@@ -97,37 +127,39 @@ approvalRouter.post(
           .emit("client_approval_updated", {
             quotationId: id,
             quotationNumber: updated.quotationNumber,
+            versionNumber: latestVersion.versionNumber,
             decision: "APPROVED",
             isArtworkApproved: true,
             status: updated.status,
-            approvedByPerson,
+            approvedByPerson: approverName,
           });
 
         res.json({
           success: true,
-          message: "Arte e orçamento aprovados pelo cliente com sucesso! Pronto para conversão em venda.",
+          message: `Arte v${latestVersion.versionNumber} aprovada com sucesso! Pronto para conferência e encaminhamento.`,
           quotation: updated,
         });
       } else {
         // Solicitação de Alteração da Arte pelo cliente
-        if (latestVersion) {
-          await prisma.artworkVersion.update({
-            where: { id: latestVersion.id },
-            data: { status: "REVISION_REQUESTED" },
-          });
-        }
+        await prisma.artworkVersion.update({
+          where: { id: latestVersion.id },
+          data: { status: "REVISION_REQUESTED" },
+        });
+
+        const designerName = quotation.designer?.name || latestVersion.designer?.name || "Designer";
 
         const updated = await prisma.quotation.update({
           where: { id },
           data: {
             isArtworkApproved: false,
+            artworkApprovalNotes: feedbackNotes,
             status: "ARTE_EM_ALTERACAO",
             timeline: {
               create: {
                 fromStatus: quotation.status,
                 toStatus: "ARTE_EM_ALTERACAO",
                 userId: req.user!.id,
-                notes: `Cliente solicitou alterações na arte: ${feedbackNotes}. Retornado para a fila do Designer.`,
+                notes: `Cliente solicitou alterações na arte (v${latestVersion.versionNumber}): ${feedbackNotes}. Retornado para a fila do designer ${designerName}.`,
               },
             },
           },
@@ -138,7 +170,12 @@ approvalRouter.post(
           action: "ARTWORK_REVISION_REQUESTED",
           entityName: "Quotation",
           entityId: id,
-          newValues: { feedbackNotes, status: "ARTE_EM_ALTERACAO" },
+          newValues: {
+            versionNumber: latestVersion.versionNumber,
+            feedbackNotes,
+            status: "ARTE_EM_ALTERACAO",
+            designerId: quotation.designerId,
+          },
           ipAddress: req.ip,
           userAgent: req.headers["user-agent"],
         });
@@ -146,11 +183,13 @@ approvalRouter.post(
         const { io } = await import("../server.js");
         io.to("sector_VENDAS")
           .to("sector_DESIGN")
+          .to("sector_DESIGNER")
           .to("sector_ADMIN")
           .to("sector_GESTAO")
           .emit("client_approval_updated", {
             quotationId: id,
             quotationNumber: updated.quotationNumber,
+            versionNumber: latestVersion.versionNumber,
             decision: "REVISION_REQUESTED",
             isArtworkApproved: false,
             status: updated.status,
@@ -159,7 +198,7 @@ approvalRouter.post(
 
         res.json({
           success: true,
-          message: "Alterações solicitadas registradas e arte devolvida para o Designer.",
+          message: `Alterações solicitadas na arte v${latestVersion.versionNumber} registradas e devolvidas para o designer ${designerName}.`,
           quotation: updated,
         });
       }

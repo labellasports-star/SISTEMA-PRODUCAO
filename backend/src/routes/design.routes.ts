@@ -21,6 +21,7 @@ designRouter.get("/queue", async (_req: AuthenticatedRequest, res: Response): Pr
         customer: true,
         seller: { select: { id: true, name: true, phone: true } },
         designer: { select: { id: true, name: true } },
+        items: true,
         designBrief: {
           include: {
             versions: {
@@ -29,7 +30,7 @@ designRouter.get("/queue", async (_req: AuthenticatedRequest, res: Response): Pr
           },
         },
         attachments: {
-          where: { fileType: "REFERENCE" },
+          orderBy: { createdAt: "desc" },
         },
       },
       orderBy: [{ desiredDeadline: "asc" }, { createdAt: "asc" }],

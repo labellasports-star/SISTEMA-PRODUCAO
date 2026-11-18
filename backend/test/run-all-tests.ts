@@ -53,12 +53,16 @@ async function run() {
     "test/designer-workflow.test.ts",
     "test/catalog-and-op-numbering.test.ts",
     "test/catalog-contract-and-auth.test.ts",
+    "test/prevenda-flow-validation.test.ts",
+    "test/custom-model-budget.test.ts",
+    "test/min-qty-pin-and-download.test.ts",
+    "test/artwork-approval-flow.test.ts",
     "test/end-to-end-pipeline.test.ts",
   ];
 
   for (const suite of suites) {
     console.log(`\n>>> Executando: ${suite}`);
-    execSync(`npx tsx ${suite}`, {
+    execSync(`npx.cmd tsx ${suite}`, {
       stdio: "inherit",
       env: {
         ...process.env,

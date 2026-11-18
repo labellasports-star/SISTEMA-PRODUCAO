@@ -77,6 +77,14 @@ conversionRouter.post(
         return;
       }
 
+      // Validação de isolamento horizontal: apenas o vendedor responsável ou gestão/admin podem converter
+      if (req.user!.role === "VENDEDOR" && quotation.sellerId !== req.user!.id) {
+        res.status(403).json({
+          error: "Acesso negado: Você não é o vendedor responsável por esta ficha.",
+        });
+        return;
+      }
+
       // REGRA DE NEGÓCIO 1: Prevenção de duplicação de OP
       if (quotation.productionOrder || quotation.status === "CONVERTIDA_VENDA") {
         res.status(409).json({
@@ -91,6 +99,16 @@ conversionRouter.post(
           error: "Conversão bloqueada: A arte deste pedido precisa ser formalmente aprovada pelo cliente antes de gerar a OP.",
         });
         return;
+      }
+
+      // REGRA DE NEGÓCIO 3: Autorização obrigatória por PIN para pedidos abaixo de 10 peças
+      if (quotation.totalQuantity < 10) {
+        if (!quotation.minQtyAuthorizedById || quotation.minQtyApprovedQuantity !== quotation.totalQuantity) {
+          res.status(400).json({
+            error: `Conversão bloqueada: Esta ficha possui quantidade abaixo de 10 peças (${quotation.totalQuantity} peças) e não possui autorização por PIN de gestor/administrador válida para esta quantidade.`,
+          });
+          return;
+        }
       }
 
       const latestArtwork = quotation.designBrief?.versions[0];

@@ -117,8 +117,8 @@ test("CONTRATO DO CATÁLOGO: Consultas públicas sem autenticação", async (t) 
     assert.strictEqual(res.status, 200);
     const data = await res.json();
     assert.strictEqual(data.totalQuantity, 10);
-    // Base: 42.90 + TPU (15.00) + Nome (5.00) = 62.90 * 10 = 629.00
-    assert.strictEqual(data.finalTotal, 629.0);
+    // Base: 42.90 + TPU (15.00) + Nome (0.00 sem custo) = 57.90 * 10 = 579.00
+    assert.strictEqual(data.finalTotal, 579.0);
     assert.strictEqual(data.isMinQuantityMet, true);
     assert.strictEqual(data.minQuantityWarnings.length, 0);
   });

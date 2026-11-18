@@ -59,8 +59,8 @@ const OFFICIAL_PRODUCTS_REFERENCE = [
     availableFabrics: JSON.stringify(["Dry Fit Tradicional", "Cacharrel Dry"]),
     availableCollars: JSON.stringify(["Gola Redonda", "Gola V"]),
     availableCustomizations: JSON.stringify([
-      { code: "NOME", name: "Nome Individual", price: 5.0 },
-      { code: "NUMERO", name: "Número Individual", price: 5.0 },
+      { code: "NOME", name: "Nome Individual", price: 0.0 },
+      { code: "NUMERO", name: "Número Individual", price: 0.0 },
       { code: "TPU_3D", name: "Escudo TPU 3D", price: 15.0 },
       { code: "MANGA_LONGA", name: "Manga Longa", price: 12.0 },
     ]),
@@ -75,8 +75,8 @@ const OFFICIAL_PRODUCTS_REFERENCE = [
     availableFabrics: JSON.stringify(["Dry Fit Tradicional", "Dry Texturizado"]),
     availableCollars: JSON.stringify(["Gola V", "Gola Redonda"]),
     availableCustomizations: JSON.stringify([
-      { code: "NOME", name: "Nome Individual", price: 5.0 },
-      { code: "NUMERO", name: "Número Individual", price: 5.0 },
+      { code: "NOME", name: "Nome Individual", price: 0.0 },
+      { code: "NUMERO", name: "Número Individual", price: 0.0 },
       { code: "TPU_3D", name: "Escudo TPU 3D", price: 15.0 },
       { code: "MANGA_LONGA", name: "Manga Longa", price: 12.0 },
     ]),
@@ -91,8 +91,8 @@ const OFFICIAL_PRODUCTS_REFERENCE = [
     availableFabrics: JSON.stringify(["Dry Texturizado", "Poliéster c/ Elastano"]),
     availableCollars: JSON.stringify(["Gola V com detalhe em ribana"]),
     availableCustomizations: JSON.stringify([
-      { code: "NOME", name: "Nome Individual", price: 5.0 },
-      { code: "NUMERO", name: "Número Individual", price: 5.0 },
+      { code: "NOME", name: "Nome Individual", price: 0.0 },
+      { code: "NUMERO", name: "Número Individual", price: 0.0 },
       { code: "TPU_3D", name: "Escudo TPU 3D", price: 15.0 },
     ]),
   },
@@ -106,8 +106,8 @@ const OFFICIAL_PRODUCTS_REFERENCE = [
     availableFabrics: JSON.stringify(["Dry Texturizado", "Dry Sport Favo"]),
     availableCollars: JSON.stringify(["Gola V Bicolor em Ribana", "Gola Redonda Ribana"]),
     availableCustomizations: JSON.stringify([
-      { code: "NOME", name: "Nome Individual", price: 5.0 },
-      { code: "NUMERO", name: "Número Individual", price: 5.0 },
+      { code: "NOME", name: "Nome Individual", price: 0.0 },
+      { code: "NUMERO", name: "Número Individual", price: 0.0 },
       { code: "TPU_3D", name: "Escudo TPU 3D", price: 15.0 },
     ]),
   },
@@ -121,7 +121,7 @@ const OFFICIAL_PRODUCTS_REFERENCE = [
     availableFabrics: JSON.stringify(["Dry Sport Favo", "Piqué Poliéster"]),
     availableCollars: JSON.stringify(["Gola Polo Estruturada"]),
     availableCustomizations: JSON.stringify([
-      { code: "NOME", name: "Nome Bordado / Estampado", price: 5.0 },
+      { code: "NOME", name: "Nome Bordado / Estampado", price: 0.0 },
       { code: "TPU_3D", name: "Escudo / Logo TPU 3D", price: 15.0 },
     ]),
   },
@@ -135,7 +135,7 @@ const OFFICIAL_PRODUCTS_REFERENCE = [
     availableFabrics: JSON.stringify(["Dry Fit Tradicional", "Dry Texturizado"]),
     availableCollars: JSON.stringify([]),
     availableCustomizations: JSON.stringify([
-      { code: "NUMERO", name: "Número no Calção", price: 3.0 },
+      { code: "NUMERO", name: "Número no Calção", price: 0.0 },
       { code: "ESCUDO", name: "Escudo no Calção", price: 5.0 },
     ]),
   },
@@ -149,8 +149,8 @@ const OFFICIAL_PRODUCTS_REFERENCE = [
     availableFabrics: JSON.stringify(["Dry Fit Tradicional", "Cacharrel Dry"]),
     availableCollars: JSON.stringify(["Gola Careca", "Gola V"]),
     availableCustomizations: JSON.stringify([
-      { code: "NOME", name: "Nome Individual", price: 5.0 },
-      { code: "NUMERO", name: "Número Frente e Costas", price: 8.0 },
+      { code: "NOME", name: "Nome Individual", price: 0.0 },
+      { code: "NUMERO", name: "Número Frente e Costas", price: 0.0 },
     ]),
   },
   {
@@ -163,7 +163,7 @@ const OFFICIAL_PRODUCTS_REFERENCE = [
     availableFabrics: JSON.stringify(["Dry Fit Perfurado"]),
     availableCollars: JSON.stringify(["Gola Redonda"]),
     availableCustomizations: JSON.stringify([
-      { code: "NUMERO", name: "Número", price: 3.0 },
+      { code: "NUMERO", name: "Número", price: 0.0 },
     ]),
   },
   {
@@ -176,7 +176,7 @@ const OFFICIAL_PRODUCTS_REFERENCE = [
     availableFabrics: JSON.stringify(["Helanca Flanelada", "Poliéster Microfibra"]),
     availableCollars: JSON.stringify(["Gola Alta com Zíper"]),
     availableCustomizations: JSON.stringify([
-      { code: "NOME", name: "Nome Individual", price: 6.0 },
+      { code: "NOME", name: "Nome Individual", price: 0.0 },
       { code: "TPU_3D", name: "Escudo TPU 3D", price: 15.0 },
     ]),
   },

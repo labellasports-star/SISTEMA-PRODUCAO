@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "Quotation" ADD COLUMN "minQtyAuthorizedById" TEXT REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Quotation" ADD COLUMN "minQtyAuthorizedAt" DATETIME;
+ALTER TABLE "Quotation" ADD COLUMN "minQtyApprovedQuantity" INTEGER;
+ALTER TABLE "Quotation" ADD COLUMN "minQtyRequestedById" TEXT REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;

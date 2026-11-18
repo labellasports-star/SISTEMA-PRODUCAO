@@ -137,9 +137,9 @@ test("Catálogo Oficial: Consulta de categorias, produtos e cálculo de orçamen
     assert.strictEqual(data.totalQuantity, 20);
     assert.strictEqual(data.isMinQuantityMet, true);
 
-    // Preço esperado: (42.90 + 15.00 + 5.00) * 20 = 62.90 * 20 = 1258.00
-    // Total com desconto: 1258.00 - 50.00 = 1208.00
-    const expectedSubtotal = (testProduct.basePrice + 15.0 + 5.0) * 20;
+    // Preço esperado: (42.90 + 15.00 + 0.00) * 20 = 57.90 * 20 = 1158.00 (Nome sem custo)
+    // Total com desconto: 1158.00 - 50.00 = 1108.00
+    const expectedSubtotal = (testProduct.basePrice + 15.0 + 0.0) * 20;
     const expectedTotal = expectedSubtotal - 50.0;
 
     assert.strictEqual(data.grossAmount, Number(expectedSubtotal.toFixed(2)));

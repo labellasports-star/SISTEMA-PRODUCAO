@@ -384,7 +384,7 @@ async function runCorrectionsTests() {
       console.log(`✔ [TEST 10 APROVADO] Extensão proibida bloqueada: "${exeData.error}"`);
       passedTests++;
     } else {
-      throw new Error(`[TEST 10 FALHOU] Esperado 400 com erro de extensão não permitida, recebido ${exeRes.status}`);
+      throw new Error(`[TEST 10 FALHOU] Esperado 400 com erro de extensão não permitida, recebido ${exeRes.status}: ${JSON.stringify(exeData)}`);
     }
 
     // -------------------------------------------------------------------------

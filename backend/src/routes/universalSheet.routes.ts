@@ -136,6 +136,7 @@ async function fetchOpSheetPayload(opIdOrNumber: string, userRole: string) {
           quotationNumber: op.quotation.quotationNumber,
           teamName: op.quotation.teamName,
           status: op.quotation.status,
+          productsSummary: op.quotation.productsSummary,
           desiredDeadline: op.quotation.desiredDeadline,
           observations: op.quotation.observations,
           isArtworkApproved: op.quotation.isArtworkApproved,
@@ -143,6 +144,7 @@ async function fetchOpSheetPayload(opIdOrNumber: string, userRole: string) {
           artworkApprovedBy: op.quotation.artworkApprovedBy,
           budgetAmount: op.quotation.budgetAmount,
           items: op.quotation.items,
+          attachments: op.quotation.attachments,
         }
       : null,
     consolidatedSizeGrid,
@@ -154,7 +156,8 @@ async function fetchOpSheetPayload(opIdOrNumber: string, userRole: string) {
           status: op.quotation.designBrief.status,
         }
       : null,
-    references: referenceAttachments,
+    references: (op.quotation?.attachments && op.quotation.attachments.length > 0) ? op.quotation.attachments : referenceAttachments,
+    attachments: op.quotation?.attachments || [],
     artwork: {
       approvedVersion: approvedArtwork,
       latestVersion: latestArtwork,
@@ -212,7 +215,7 @@ universalSheetRouter.get("/by-batch/:batchId", async (req: AuthenticatedRequest,
 });
 
 // 3. GET /api/universal-sheet/quotations/:quotationId - Consulta pré-OP (para Pré-Venda e Designer)
-universalSheetRouter.get("/quotations/:quotationId", async (req: AuthenticatedRequest, res: Response) => {
+universalSheetRouter.get(["/quotations/:quotationId", "/quotation/:quotationId"], async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { quotationId } = req.params;
     const user = req.user!;
@@ -260,12 +263,47 @@ universalSheetRouter.get("/quotations/:quotationId", async (req: AuthenticatedRe
       return res.status(404).json({ error: "Orçamento / Oportunidade não encontrada." });
     }
 
+    // Validação de acesso RBAC e isolamento de contas
+    if (user.role === "VENDEDOR") {
+      if (quotation.sellerId !== user.id) {
+        return res.status(403).json({
+          error: "Acesso negado: Vendedores só possuem permissão para acessar a ficha de suas próprias cotações.",
+        });
+      }
+    } else if (user.role === "DESIGNER") {
+      const designStatuses = [
+        "SOLICITACAO_ARTE",
+        "DESENVOLVIMENTO_ARTE",
+        "AGUARDANDO_APROVACAO_ARTE",
+        "ARTE_EM_ALTERACAO",
+        "ORCAMENTO_APROVADO",
+        "CONVERTIDA_VENDA",
+      ];
+      if (!designStatuses.includes(quotation.status) && quotation.designerId !== user.id) {
+        return res.status(403).json({
+          error: "Acesso negado: Este orçamento ainda não foi encaminhado para o setor de Design.",
+        });
+      }
+    } else if (user.role === "OPERADOR") {
+      if (user.sectorCode !== "SAC_INTERNO") {
+        const hasBatch = quotation.productionOrder?.batches.some(
+          (b: any) => b.currentSectorId === user.sectorId || b.assignedOperatorId === user.id
+        );
+        if (!hasBatch) {
+          return res.status(403).json({
+            error: "Acesso negado: Operadores só possuem acesso a pedidos encaminhados ao seu setor de produção.",
+          });
+        }
+      }
+    }
+
     const consolidatedSizeGrid: Record<string, number> = {};
     for (const item of quotation.items) {
       consolidatedSizeGrid[item.size] = (consolidatedSizeGrid[item.size] || 0) + item.quantity;
     }
 
-    const referenceAttachments = quotation.attachments.filter((a) => a.fileType === "REFERENCE");
+    const allAttachments = quotation.attachments || [];
+    const referenceAttachments = allAttachments;
     const artworkVersions = quotation.designBrief?.versions || [];
     const approvedArtwork = artworkVersions.find((v) => v.status === "APPROVED") || null;
 
@@ -274,6 +312,7 @@ universalSheetRouter.get("/quotations/:quotationId", async (req: AuthenticatedRe
       quotationNumber: quotation.quotationNumber,
       teamName: quotation.teamName,
       status: quotation.status,
+      productsSummary: quotation.productsSummary,
       totalQuantity: quotation.totalQuantity,
       budgetAmount: quotation.budgetAmount,
       desiredDeadline: quotation.desiredDeadline,
@@ -285,6 +324,7 @@ universalSheetRouter.get("/quotations/:quotationId", async (req: AuthenticatedRe
       seller: quotation.seller,
       designer: quotation.designer,
       items: quotation.items,
+      attachments: allAttachments,
       consolidatedSizeGrid,
       briefing: quotation.designBrief
         ? {

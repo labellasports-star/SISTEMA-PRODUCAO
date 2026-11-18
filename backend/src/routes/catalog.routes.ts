@@ -2,8 +2,23 @@ import { Router, Request, Response } from "express";
 import { z } from "zod";
 import { prisma } from "../prisma.js";
 import { authenticateToken, AuthenticatedRequest } from "../middleware/auth.js";
+import { parseMonetaryValue, calculateCustomizationsTotal, isFreeCustomization } from "../utils/pricing.js";
 
 export const catalogRouter = Router();
+
+function normalizeCustomizations(customs: any[]): any[] {
+  if (!Array.isArray(customs)) return [];
+  return customs.map((c) => {
+    if (c && typeof c === "object") {
+      const isFree = isFreeCustomization(c.code || c.name || "");
+      return {
+        ...c,
+        price: isFree ? 0.0 : (c.price ?? 0.0),
+      };
+    }
+    return c;
+  });
+}
 
 // -----------------------------------------------------------------------------
 // 1. GET /api/catalog/categories
@@ -64,7 +79,9 @@ catalogRouter.get("/products", async (req: Request, res: Response): Promise<void
       availableFabrics: p.availableFabrics ? JSON.parse(p.availableFabrics) : [],
       availableCollars: p.availableCollars ? JSON.parse(p.availableCollars) : [],
       availableGenders: p.availableGenders ? JSON.parse(p.availableGenders) : [],
-      availableCustomizations: p.availableCustomizations ? JSON.parse(p.availableCustomizations) : [],
+      availableCustomizations: p.availableCustomizations
+        ? normalizeCustomizations(JSON.parse(p.availableCustomizations))
+        : [],
     }));
 
     res.json({ products: formatted });
@@ -99,7 +116,7 @@ catalogRouter.get("/products/:id", async (req: Request, res: Response): Promise<
         availableCollars: product.availableCollars ? JSON.parse(product.availableCollars) : [],
         availableGenders: product.availableGenders ? JSON.parse(product.availableGenders) : [],
         availableCustomizations: product.availableCustomizations
-          ? JSON.parse(product.availableCustomizations)
+          ? normalizeCustomizations(JSON.parse(product.availableCustomizations))
           : [],
       },
     });
@@ -117,8 +134,12 @@ const calculateSchema = z.object({
   items: z
     .array(
       z.object({
-        catalogProductId: z.string().optional(),
-        productId: z.string().optional(),
+        catalogProductId: z.string().nullable().optional(),
+        productId: z.string().nullable().optional(),
+        isCustomModel: z.boolean().optional().default(false),
+        customModelName: z.string().nullable().optional(),
+        productModel: z.string().optional(),
+        unitPrice: z.union([z.number(), z.string()]).optional(),
         quantity: z.number().int().min(1, "Quantidade deve ser maior que zero."),
         fabricType: z.string().optional(),
         collarType: z.string().optional(),
@@ -129,8 +150,8 @@ const calculateSchema = z.object({
               z.object({
                 name: z.string().optional(),
                 code: z.string().optional(),
-                additionalPrice: z.number().optional(),
-                price: z.number().optional(),
+                additionalPrice: z.union([z.number(), z.string()]).optional(),
+                price: z.union([z.number(), z.string()]).optional(),
               })
             ),
           ])
@@ -161,16 +182,73 @@ catalogRouter.post("/calculate-budget", async (req: Request, res: Response): Pro
     const minQuantityWarnings: string[] = [];
 
     for (const item of items) {
+      let product = null;
       const prodId = item.catalogProductId || item.productId;
-      if (!prodId) {
-        res.status(400).json({ error: "ID do produto do catálogo é obrigatório." });
-        return;
+      if (prodId) {
+        product = await prisma.catalogProduct.findUnique({
+          where: { id: prodId },
+          include: { category: true },
+        });
+      } else if (!item.isCustomModel && item.productModel && item.productModel.toUpperCase() !== "OUTROS") {
+        product = await prisma.catalogProduct.findFirst({
+          where: { name: { contains: item.productModel } },
+          include: { category: true },
+        });
       }
 
-      const product = await prisma.catalogProduct.findUnique({
-        where: { id: prodId },
-        include: { category: true },
-      });
+      const isCustom =
+        !product &&
+        (item.isCustomModel ||
+          item.productModel === "Outros" ||
+          item.productModel?.toLowerCase() === "outros" ||
+          (!item.catalogProductId && !item.productId));
+
+      if (isCustom) {
+        const modelName = (item.customModelName || item.productModel || "").trim();
+        if (!modelName || modelName.toUpperCase() === "OUTROS") {
+          res.status(400).json({ error: "Nome do modelo é obrigatório quando 'Outros' é selecionado." });
+          return;
+        }
+
+        const basePrice = parseMonetaryValue(item.unitPrice);
+        if (basePrice <= 0) {
+          res.status(400).json({ error: "Valor unitário deve ser maior que zero." });
+          return;
+        }
+
+        if (item.quantity < 10) {
+          minQuantityWarnings.push(
+            `O modelo personalizado '${modelName}' possui quantidade mínima padrão de 10 unidades (informado: ${item.quantity}).`
+          );
+        }
+
+        const { totalPerUnit: customizationTotalPerUnit, appliedList: appliedCustomizations } =
+          calculateCustomizationsTotal(item.customizations as any[]);
+
+        const unitPrice = Number((basePrice + customizationTotalPerUnit).toFixed(2));
+        const subtotal = Number((unitPrice * item.quantity).toFixed(2));
+
+        totalQuantity += item.quantity;
+        totalItemsAmount += subtotal;
+
+        calculatedItems.push({
+          catalogProductId: null,
+          productCode: "OUTROS",
+          productName: modelName,
+          categoryName: "Modelo Especial / Personalizado",
+          quantity: item.quantity,
+          basePrice,
+          customizationTotalPerUnit,
+          appliedCustomizations,
+          unitPrice,
+          subtotal,
+          fabricType: item.fabricType || "Dry Fit Tradicional",
+          collarType: item.collarType || "Gola Careca",
+          isCustomModel: true,
+          customModelName: modelName,
+        });
+        continue;
+      }
 
       if (!product) {
         res.status(404).json({ error: `Produto ID '${prodId}' não encontrado no catálogo.` });
@@ -198,12 +276,14 @@ catalogRouter.post("/calculate-budget", async (req: Request, res: Response): Pro
             (c: any) => c.code === custom || c.name === custom
           );
           if (found) {
-            customizationTotalPerUnit += found.price;
-            appliedCustomizations.push({ name: found.name, price: found.price });
+            const price = isFreeCustomization(found.code || found.name) ? 0.0 : found.price;
+            customizationTotalPerUnit += price;
+            appliedCustomizations.push({ name: found.name, price });
           }
         } else if (typeof custom === "object" && custom !== null) {
-          const price = custom.additionalPrice ?? custom.price ?? 0;
+          const rawPrice = custom.additionalPrice ?? custom.price ?? 0;
           const name = custom.name || custom.code || "Personalização";
+          const price = isFreeCustomization(name) ? 0.0 : rawPrice;
           customizationTotalPerUnit += price;
           appliedCustomizations.push({ name, price });
         }

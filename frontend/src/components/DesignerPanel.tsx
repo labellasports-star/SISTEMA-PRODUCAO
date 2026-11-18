@@ -6,6 +6,7 @@ import {
   Clock,
   CheckCircle2,
   AlertTriangle,
+  AlertCircle,
   RefreshCw,
   ExternalLink,
   UserCheck,
@@ -192,23 +193,92 @@ export function DesignerPanel({ currentUser }: { currentUser?: any }) {
               </div>
 
               <h3 className="mt-2 text-base font-bold text-white">{item.teamName}</h3>
-              <p className="text-xs text-slate-400">Cliente: {item.customer.companyName}</p>
+              <p className="text-xs text-slate-400">
+                Cliente: <strong className="text-slate-300">{item.customer.companyName}</strong> ({item.customer.contactName} - {item.customer.phone})
+              </p>
+
+              {/* Especificações Técnicas do Modelo */}
+              {item.items && item.items.length > 0 && (() => {
+                const first = item.items[0];
+                return (
+                  <div className="mt-2.5 p-2 rounded-lg bg-slate-950/60 border border-slate-800 text-[11px] space-y-1">
+                    <div className="text-slate-300">
+                      <strong className="text-slate-400">Modelo: </strong>
+                      <span className="text-sky-300 font-semibold">
+                        {first.isCustomModel ? `Outros: ${first.customModelName || first.productModel}` : first.productModel}
+                      </span>
+                    </div>
+                    <div className="text-slate-300 flex flex-wrap gap-x-3">
+                      <span>
+                        <strong className="text-slate-400">Tecido: </strong>
+                        {first.isCustomFabric ? `Outros: ${first.customFabricName || first.fabricType}` : first.fabricType || "Dry Fit Padrão"}
+                      </span>
+                      <span>
+                        <strong className="text-slate-400">Gola: </strong>
+                        {first.isCustomCollar ? `Outros: ${first.customCollarName || first.collarType}` : first.collarType || "Gola Careca"}
+                      </span>
+                    </div>
+                    {first.customizationNotes && (
+                      <div className="text-slate-300">
+                        <strong className="text-slate-400">Opcionais: </strong>
+                        <span>{first.customizationNotes}</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* Briefing */}
-              <div className="mt-3 p-3 rounded-xl bg-slate-950/80 border border-slate-800/80 text-xs">
-                <p className="text-slate-400 line-clamp-3">
-                  <strong>Briefing:</strong> {item.designBrief?.briefingText || item.observations || "Sem briefing detalhado."}
+              <div className="mt-2.5 p-3 rounded-xl bg-slate-950/80 border border-slate-800/80 text-xs">
+                <p className="text-slate-300 line-clamp-3">
+                  <strong className="text-slate-400">Briefing: </strong>
+                  {item.designBrief?.briefingText || item.observations || "Sem briefing detalhado."}
                 </p>
               </div>
 
-              {/* Referências e Histórico */}
-              <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-400">
-                {item.attachments && item.attachments.length > 0 && (
-                  <span className="flex items-center gap-1 rounded bg-sky-950/80 px-2 py-0.5 text-[10px] font-medium text-sky-300 border border-sky-800">
-                    <ImageIcon className="h-3 w-3" />
-                    {item.attachments.length} anexo{item.attachments.length > 1 ? "s" : ""}
+              {/* Referências e Anexos com Download Direto */}
+              {item.attachments && item.attachments.length > 0 && (
+                <div className="mt-2.5 space-y-1">
+                  <span className="text-[11px] font-semibold text-slate-400 block">
+                    Arquivos da Pré-Venda ({item.attachments.length}):
                   </span>
-                )}
+                  <div className="space-y-1 max-h-28 overflow-y-auto">
+                    {item.attachments.map((att: any) => (
+                      <div
+                        key={att.id}
+                        className="flex items-center justify-between p-1.5 rounded bg-slate-950 border border-slate-800 text-[11px]"
+                      >
+                        <span className="text-slate-300 truncate max-w-[180px]" title={att.originalName || att.fileName}>
+                          {att.originalName || att.fileName}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => api.downloadFile(att.fileUrl, att.originalName || att.fileName)}
+                          className="flex items-center gap-1 text-sky-400 hover:text-sky-300 font-semibold px-2 py-0.5 rounded bg-sky-950/80 border border-sky-800"
+                        >
+                          <Download className="h-3 w-3" /> Baixar
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Alterações Solicitadas pelo Cliente em ARTE_EM_ALTERACAO */}
+              {item.status === "ARTE_EM_ALTERACAO" && (
+                <div className="mt-2.5 p-2.5 rounded-xl bg-rose-950/40 border border-rose-800/60 text-xs text-rose-300 space-y-1">
+                  <div className="flex items-center gap-1.5 font-bold text-rose-400">
+                    <AlertCircle className="h-3.5 w-3.5" />
+                    <span>Alteração Solicitada pelo Cliente (v{item.designBrief?.versions?.[0]?.versionNumber || 1})</span>
+                  </div>
+                  <p className="text-slate-200 text-[11px] whitespace-pre-wrap">
+                    {item.artworkApprovalNotes || "Cliente solicitou ajustes nesta versão."}
+                  </p>
+                </div>
+              )}
+
+              {/* Versões da Arte */}
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-400">
                 {item.designBrief?.versions && item.designBrief.versions.length > 0 && (
                   <span className="rounded bg-slate-800 px-2 py-0.5 text-[10px] font-medium text-slate-300">
                     v{item.designBrief.versions[0].versionNumber} ({item.designBrief.versions.length} versões)
@@ -238,6 +308,17 @@ export function DesignerPanel({ currentUser }: { currentUser?: any }) {
                   >
                     <UserCheck className="h-3.5 w-3.5" />
                     Assumir Criação
+                  </button>
+                ) : item.status === "ARTE_EM_ALTERACAO" ? (
+                  <button
+                    onClick={() => {
+                      setSelectedQuotation(item);
+                      setIsVersionModalOpen(true);
+                    }}
+                    className="w-full sm:w-auto flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-rose-600 py-2 px-3 text-xs font-semibold text-white hover:bg-rose-500 transition shadow-lg shadow-rose-600/30"
+                  >
+                    <Upload className="h-3.5 w-3.5" />
+                    Anexar Correção (v{(item.designBrief?.versions?.[0]?.versionNumber || 0) + 1})
                   </button>
                 ) : (
                   <button
@@ -270,11 +351,23 @@ export function DesignerPanel({ currentUser }: { currentUser?: any }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
           <div className="w-full max-w-lg rounded-2xl bg-slate-900 border border-slate-800 p-6 shadow-2xl">
             <h3 className="text-lg font-bold text-white mb-2">
-              Anexar Versão de Arte — {selectedQuotation.teamName}
+              {selectedQuotation.status === "ARTE_EM_ALTERACAO"
+                ? `Anexar Correção da Arte (v${(selectedQuotation.designBrief?.versions?.[0]?.versionNumber || 0) + 1}) — ${selectedQuotation.teamName}`
+                : `Anexar Versão de Arte — ${selectedQuotation.teamName}`}
             </h3>
             <p className="text-xs text-slate-400 mb-4">
               Ao enviar a arte, o pedido será encaminhado automaticamente para o Vendedor apresentar ao cliente.
             </p>
+
+            {selectedQuotation.status === "ARTE_EM_ALTERACAO" && (
+              <div className="mb-4 rounded-xl bg-rose-950/40 border border-rose-800/60 p-3 text-xs text-rose-200">
+                <span className="font-bold text-rose-400 flex items-center gap-1.5 mb-1">
+                  <AlertCircle className="h-4 w-4" />
+                  Ajustes solicitados pelo cliente:
+                </span>
+                <p className="whitespace-pre-wrap">{selectedQuotation.artworkApprovalNotes || "Verifique o histórico da ficha."}</p>
+              </div>
+            )}
 
             {formError && (
               <div className="mb-4 rounded-lg bg-rose-500/15 p-3 text-xs text-rose-300 border border-rose-500/30">
