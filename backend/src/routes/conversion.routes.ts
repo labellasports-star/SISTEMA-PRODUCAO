@@ -127,8 +127,22 @@ conversionRouter.post(
       const batchNumber = `${opNumber} - 1/1`;
       const finalAmount = parseResult.data.finalNegotiatedAmount ?? quotation.budgetAmount;
 
-      // Executar transação atômica completa
+      // Executar transação atômica completa com prevenção de concorrência e idempotência
       const result = await prisma.$transaction(async (tx) => {
+        // Validação atômica sob lock transacional para impedir conversões duplicadas ou simultâneas
+        const fresh = await tx.quotation.findUnique({
+          where: { id: quotation.id },
+          include: { productionOrder: true },
+        });
+
+        if (fresh?.productionOrder || fresh?.status === "CONVERTIDA_VENDA") {
+          const err: any = new Error(
+            `Este orçamento já foi convertido anteriormente na OP ${fresh?.productionOrder?.opNumber || ""}.`
+          );
+          err.code = "ALREADY_CONVERTED";
+          throw err;
+        }
+
         // 1. Criar a Ordem de Produção Principal
         const op = await tx.productionOrder.create({
           data: {
@@ -236,7 +250,13 @@ conversionRouter.post(
         productionOrder: result.op,
         initialBatch: result.batch,
       });
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.code === "ALREADY_CONVERTED" || error?.code === "P2002") {
+        res.status(409).json({
+          error: error.message || "Este orçamento já foi convertido anteriormente em Ordem de Produção.",
+        });
+        return;
+      }
       console.error("Erro na conversão para OP:", error);
       res.status(500).json({ error: "Erro interno ao converter pedido em Ordem de Produção." });
     }

@@ -22,9 +22,9 @@ const itemSchema = z.object({
   customFabricName: z.string().nullable().optional(),
   isCustomCollar: z.boolean().optional().default(false),
   customCollarName: z.string().nullable().optional(),
-  gender: z.string().default("UNISSEX"),
-  size: z.string().min(1),
-  quantity: z.number().int().min(1),
+  gender: z.string().trim().min(1, "Gênero é obrigatório em cada linha da grade."),
+  size: z.string().trim().min(1, "Tamanho é obrigatório em cada linha da grade."),
+  quantity: z.number().int("Quantidade deve ser um número inteiro.").min(1, "Quantidade deve ser de pelo menos 1 unidade."),
   customName: z.string().optional(),
   customNumber: z.string().optional(),
   fabricType: z.string().optional(),
@@ -114,6 +114,79 @@ async function processAndRecalculateItems(
   const processedItems = [];
 
   for (const it of items) {
+    // 1. Validação obrigatória de gênero, tamanho e quantidade inteira positiva
+    if (!it.gender || typeof it.gender !== "string" || !it.gender.trim()) {
+      return {
+        processedItems: [],
+        totalQuantity: 0,
+        totalItemsAmount: 0,
+        error: "Gênero é obrigatório em cada linha da grade.",
+      };
+    }
+    const ALLOWED_GENDERS = ["MASCULINO", "FEMININO", "INFANTIL", "UNISSEX"];
+    const normalizedGender = it.gender.trim().toUpperCase();
+    if (!ALLOWED_GENDERS.includes(normalizedGender)) {
+      return {
+        processedItems: [],
+        totalQuantity: 0,
+        totalItemsAmount: 0,
+        error: `Gênero '${it.gender}' inválido. Escolha entre Masculino, Feminino, Infantil ou Unissex.`,
+      };
+    }
+
+    if (!it.size || typeof it.size !== "string" || !it.size.trim()) {
+      return {
+        processedItems: [],
+        totalQuantity: 0,
+        totalItemsAmount: 0,
+        error: "Tamanho é obrigatório em cada linha da grade.",
+      };
+    }
+
+    const INFANTIL_SIZES = ["2ANOS", "4ANOS", "6ANOS", "8ANOS", "10ANOS", "12ANOS", "14ANOS", "16ANOS"];
+    const LEGACY_INFANTIL_SIZES = ["2", "4", "6", "8", "10", "12", "14", "16"];
+    const ADULT_SIZES = ["PP", "P", "M", "G", "GG", "XG", "X1", "X2", "X3", "X4", "X5", "X6"];
+    const LEGACY_ADULT_SIZES = ["XXG", "EXG", "U"];
+    const genderLabels: Record<string, string> = {
+      MASCULINO: "Masculino",
+      FEMININO: "Feminino",
+      INFANTIL: "Infantil",
+      UNISSEX: "Unissex",
+    };
+    const normalizedSize = it.size.trim().toUpperCase();
+
+    // Validação da combinação entre gênero e tamanho (permitindo novos e formatos legados registrados)
+    if (normalizedGender === "INFANTIL") {
+      const isInfantilValid = INFANTIL_SIZES.includes(normalizedSize) || LEGACY_INFANTIL_SIZES.includes(normalizedSize);
+      if (!isInfantilValid) {
+        return {
+          processedItems: [],
+          totalQuantity: 0,
+          totalItemsAmount: 0,
+          error: `Tamanho '${it.size}' inválido para o gênero Infantil. Opções permitidas: ${INFANTIL_SIZES.join(", ")}.`,
+        };
+      }
+    } else if (["MASCULINO", "FEMININO", "UNISSEX"].includes(normalizedGender)) {
+      const isAdultValid = ADULT_SIZES.includes(normalizedSize) || LEGACY_ADULT_SIZES.includes(normalizedSize);
+      if (!isAdultValid) {
+        return {
+          processedItems: [],
+          totalQuantity: 0,
+          totalItemsAmount: 0,
+          error: `Tamanho '${it.size}' inválido para o gênero ${genderLabels[normalizedGender] || it.gender}. Opções permitidas: ${ADULT_SIZES.join(", ")}.`,
+        };
+      }
+    }
+
+    if (!Number.isInteger(it.quantity) || it.quantity < 1) {
+      return {
+        processedItems: [],
+        totalQuantity: 0,
+        totalItemsAmount: 0,
+        error: "A quantidade de cada linha da grade deve ser um número inteiro positivo.",
+      };
+    }
+
     let isCustom =
       it.isCustomModel === true ||
       it.productModel === "Outros" ||
@@ -134,6 +207,26 @@ async function processAndRecalculateItems(
         isCustom = false;
       } else {
         isCustom = true;
+      }
+    }
+
+    // Para produtos cadastrados, respeitar os gêneros configurados no catálogo
+    if (catalogProduct && catalogProduct.availableGenders) {
+      let allowedForProduct: string[] = [];
+      try {
+        allowedForProduct = Array.isArray(catalogProduct.availableGenders)
+          ? catalogProduct.availableGenders
+          : JSON.parse(catalogProduct.availableGenders);
+      } catch {
+        allowedForProduct = catalogProduct.availableGenders.split(",").map((s: string) => s.trim().toUpperCase());
+      }
+      if (allowedForProduct.length > 0 && !allowedForProduct.includes(normalizedGender)) {
+        return {
+          processedItems: [],
+          totalQuantity: 0,
+          totalItemsAmount: 0,
+          error: `O gênero '${it.gender}' não está disponível para o produto '${catalogProduct.name}'.`,
+        };
       }
     }
 
@@ -208,6 +301,8 @@ async function processAndRecalculateItems(
 
     processedItems.push({
       ...it,
+      gender: normalizedGender,
+      size: it.size.trim().toUpperCase(),
       catalogProductId: catalogProduct ? catalogProduct.id : (isCustom ? null : (it.catalogProductId || null)),
       productModel: finalModelName,
       isCustomModel: isCustom,
@@ -243,7 +338,7 @@ const createQuotationSchema = z.object({
     .optional(),
   teamName: z.string().min(2, "Nome da equipe/time/projeto é obrigatório."),
   productsSummary: z.string().optional(),
-  totalQuantity: z.number().int().min(1, "A quantidade total deve ser no mínimo 1."),
+  totalQuantity: z.number().int().min(1, "A quantidade total deve ser no mínimo 1.").optional().default(1),
   budgetAmount: z.number().min(0).default(0.0),
   discountAmount: z.number().min(0).optional().default(0.0),
   frozenPriceSnapshot: z.string().optional(),
@@ -934,102 +1029,18 @@ quotationsRouter.put(
 
       const data = parseResult.data;
 
-      // 1. Atualizar dados do cliente se informados
-      if (data.customer && quotation.customerId) {
-        await prisma.customer.update({
-          where: { id: quotation.customerId },
-          data: {
-            companyName: data.customer.companyName || undefined,
-            contactName: data.customer.contactName || undefined,
-            phone: data.customer.phone || undefined,
-          },
-        });
+      // Recalcular a grade antes de validar a autorização por quantidade.
+      const calculation = data.items?.length
+        ? await processAndRecalculateItems(data.items, data.budgetAmount || quotation.budgetAmount, data.totalQuantity || quotation.totalQuantity)
+        : undefined;
+      if (calculation?.error) {
+        res.status(400).json({ error: calculation.error });
+        return;
       }
+      const updatedTotalQuantity = calculation?.totalQuantity ?? data.totalQuantity;
+      const updatedBudgetAmount = calculation?.totalItemsAmount ?? data.budgetAmount;
 
-      // 2. Atualizar ou criar briefing de design
-      if (data.briefingText !== undefined) {
-        if (quotation.designBrief) {
-          await prisma.designBrief.update({
-            where: { id: quotation.designBrief.id },
-            data: { briefingText: data.briefingText },
-          });
-        } else if (data.briefingText.trim() !== "") {
-          await prisma.designBrief.create({
-            data: {
-              quotationId: id,
-              briefingText: data.briefingText,
-            },
-          });
-        }
-      }
-
-      // 3. Atualizar itens da grade se enviados (com recálculo e validação segura)
-      let updatedTotalQuantity = data.totalQuantity;
-      let updatedBudgetAmount = data.budgetAmount;
-
-      if (data.items) {
-        if (data.items.length > 0) {
-          const calculation = await processAndRecalculateItems(
-            data.items,
-            data.budgetAmount || quotation.budgetAmount,
-            data.totalQuantity || quotation.totalQuantity
-          );
-          if (calculation.error) {
-            res.status(400).json({ error: calculation.error });
-            return;
-          }
-          updatedTotalQuantity = calculation.totalQuantity;
-          updatedBudgetAmount = calculation.totalItemsAmount;
-
-          await prisma.quotationItem.deleteMany({ where: { quotationId: id } });
-          await prisma.quotationItem.createMany({
-            data: calculation.processedItems.map((it) => ({
-              quotationId: id,
-              productModel: it.productModel,
-              catalogProductId: it.catalogProductId || null,
-              isCustomModel: it.isCustomModel ?? false,
-              customModelName: it.customModelName || null,
-              isCustomFabric: it.isCustomFabric ?? false,
-              customFabricName: it.customFabricName || null,
-              isCustomCollar: it.isCustomCollar ?? false,
-              customCollarName: it.customCollarName || null,
-              gender: it.gender,
-              size: it.size,
-              quantity: it.quantity,
-              customName: it.customName || null,
-              customNumber: it.customNumber || null,
-              fabricType: it.fabricType || null,
-              collarType: it.collarType || null,
-              unitPrice: typeof it.unitPrice === "number" ? it.unitPrice : (parseMonetaryValue(it.unitPrice) || 0),
-              subtotal: typeof it.subtotal === "number" ? it.subtotal : (parseMonetaryValue(it.subtotal) || 0),
-              customizationNotes: it.customizationNotes || null,
-            })),
-          });
-        } else {
-          await prisma.quotationItem.deleteMany({ where: { quotationId: id } });
-        }
-      }
-
-      // 4. Anexar novos arquivos se enviados
-      if (data.attachments && data.attachments.length > 0) {
-        for (const att of data.attachments) {
-          const ext = att.fileName.split(".").pop()?.toUpperCase() || "";
-          await prisma.quotationAttachment.create({
-            data: {
-              quotationId: id,
-              fileName: att.fileName,
-              originalName: att.originalName || att.fileName,
-              fileType: att.fileType,
-              fileExtension: ext,
-              fileSize: att.fileSize || null,
-              fileUrl: att.fileUrl,
-              uploadedById: req.user!.id,
-            },
-          });
-        }
-      }
-
-      // 5. Verificação e atualização da autorização por PIN para pedidos abaixo de 10 peças
+      // Verificação e atualização da autorização por PIN para pedidos abaixo de 10 peças
       const finalQuantity = updatedTotalQuantity ?? data.totalQuantity ?? quotation.totalQuantity;
       let minQtyUpdate: any = {};
       let authorizedManagerObj: any = null;
@@ -1075,7 +1086,55 @@ quotationsRouter.put(
         };
       }
 
-      // 6. Atualizar campos escalares da cotação
+      // 1. Atualizar dados do cliente se informados
+      if (data.customer && quotation.customerId) {
+        await prisma.customer.update({
+          where: { id: quotation.customerId },
+          data: {
+            companyName: data.customer.companyName || undefined,
+            contactName: data.customer.contactName || undefined,
+            phone: data.customer.phone || undefined,
+          },
+        });
+      }
+
+      // 2. Atualizar ou criar briefing de design
+      if (data.briefingText !== undefined) {
+        if (quotation.designBrief) {
+          await prisma.designBrief.update({
+            where: { id: quotation.designBrief.id },
+            data: { briefingText: data.briefingText },
+          });
+        } else if (data.briefingText.trim() !== "") {
+          await prisma.designBrief.create({
+            data: {
+              quotationId: id,
+              briefingText: data.briefingText,
+            },
+          });
+        }
+      }
+
+      // Anexar novos arquivos se enviados
+      if (data.attachments && data.attachments.length > 0) {
+        for (const att of data.attachments) {
+          const ext = att.fileName.split(".").pop()?.toUpperCase() || "";
+          await prisma.quotationAttachment.create({
+            data: {
+              quotationId: id,
+              fileName: att.fileName,
+              originalName: att.originalName || att.fileName,
+              fileType: att.fileType,
+              fileExtension: ext,
+              fileSize: att.fileSize || null,
+              fileUrl: att.fileUrl,
+              uploadedById: req.user!.id,
+            },
+          });
+        }
+      }
+
+      // Salvar junto com a grade para manter quantidade, valor e itens consistentes.
       const updated = await prisma.quotation.update({
         where: { id },
         data: {
@@ -1087,6 +1146,29 @@ quotationsRouter.put(
           observations: data.observations,
           desiredDeadline: data.desiredDeadline ? new Date(data.desiredDeadline) : undefined,
           ...minQtyUpdate,
+          items: data.items ? {
+            deleteMany: {},
+            create: calculation?.processedItems.map(it => ({
+                productModel: it.productModel,
+                catalogProductId: it.catalogProductId || null,
+                isCustomModel: it.isCustomModel ?? false,
+                customModelName: it.customModelName || null,
+                isCustomFabric: it.isCustomFabric ?? false,
+                customFabricName: it.customFabricName || null,
+                isCustomCollar: it.isCustomCollar ?? false,
+                customCollarName: it.customCollarName || null,
+                gender: it.gender,
+                size: it.size,
+                quantity: it.quantity,
+                customName: it.customName || null,
+                customNumber: it.customNumber || null,
+                fabricType: it.fabricType || null,
+                collarType: it.collarType || null,
+                unitPrice: typeof it.unitPrice === "number" ? it.unitPrice : (parseMonetaryValue(it.unitPrice) || 0),
+                subtotal: typeof it.subtotal === "number" ? it.subtotal : (parseMonetaryValue(it.subtotal) || 0),
+                customizationNotes: it.customizationNotes || null,
+            })) ?? [],
+          } : undefined,
           timeline: {
             create: {
               fromStatus: quotation.status,

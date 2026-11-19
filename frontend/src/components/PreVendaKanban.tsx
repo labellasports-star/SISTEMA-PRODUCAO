@@ -47,6 +47,94 @@ const KANBAN_COLUMNS = [
   { id: "PERDIDA", title: "Perdida", color: "bg-slate-700/20 border-slate-700/40 text-slate-400" },
 ];
 
+const GENDER_OPTIONS = [
+  { value: "MASCULINO", label: "Masculino" },
+  { value: "FEMININO", label: "Feminino" },
+  { value: "INFANTIL", label: "Infantil" },
+  { value: "UNISSEX", label: "Unissex" },
+];
+
+const INFANTIL_SIZES = ["2ANOS", "4ANOS", "6ANOS", "8ANOS", "10ANOS", "12ANOS", "14ANOS", "16ANOS"];
+const ADULT_SIZES = ["PP", "P", "M", "G", "GG", "XG", "X1", "X2", "X3", "X4", "X5", "X6"];
+
+function getAvailableSizesForGender(gender: string): string[] {
+  if (gender === "INFANTIL") return INFANTIL_SIZES;
+  if (["MASCULINO", "FEMININO", "UNISSEX"].includes(gender)) return ADULT_SIZES;
+  return [];
+}
+
+function isSizeCompatibleWithGender(size: string, gender: string): boolean {
+  if (!size || !gender) return false;
+  const upperSize = size.toUpperCase().trim();
+  if (gender === "INFANTIL") {
+    return INFANTIL_SIZES.includes(upperSize) || ["2", "4", "6", "8", "10", "12", "14", "16"].includes(upperSize);
+  }
+  if (["MASCULINO", "FEMININO", "UNISSEX"].includes(gender)) {
+    return ADULT_SIZES.includes(upperSize) || ["XXG", "EXG", "U"].includes(upperSize);
+  }
+  return false;
+}
+
+interface GradeRow {
+  key: number;
+  gender: string;
+  size: string;
+  quantity: string;
+  customName?: string;
+  customNumber?: string;
+}
+
+interface SavedGradeItem {
+  productModel: string;
+  catalogProductId?: string | null;
+  isCustomModel?: boolean;
+  customModelName?: string | null;
+  isCustomFabric?: boolean;
+  customFabricName?: string | null;
+  isCustomCollar?: boolean;
+  customCollarName?: string | null;
+  fabricType?: string | null;
+  collarType?: string | null;
+  customizationNotes?: string | null;
+  gender: string;
+  size: string;
+  quantity: number;
+  unitPrice: number;
+  subtotal: number;
+  customName?: string | null;
+  customNumber?: string | null;
+}
+
+function isSameGradeProduct(item: SavedGradeItem, reference: SavedGradeItem) {
+  return (
+    (item.catalogProductId || null) === (reference.catalogProductId || null) &&
+    (item.productModel || "") === (reference.productModel || "") &&
+    (item.customModelName || null) === (reference.customModelName || null) &&
+    (item.isCustomModel ?? false) === (reference.isCustomModel ?? false) &&
+    (item.isCustomFabric ?? false) === (reference.isCustomFabric ?? false) &&
+    (item.customFabricName || null) === (reference.customFabricName || null) &&
+    (item.fabricType || null) === (reference.fabricType || null) &&
+    (item.isCustomCollar ?? false) === (reference.isCustomCollar ?? false) &&
+    (item.customCollarName || null) === (reference.customCollarName || null) &&
+    (item.collarType || null) === (reference.collarType || null) &&
+    (item.customizationNotes || "") === (reference.customizationNotes || "") &&
+    Number(item.unitPrice || 0) === Number(reference.unitPrice || 0)
+  );
+}
+
+function savedItemPayload(item: SavedGradeItem) {
+  const hasTpu = /TPU|ESCUDO/i.test(item.customizationNotes || "");
+  return {
+    ...item,
+    unitPrice: hasTpu ? Math.max(0.01, item.unitPrice - 15) : item.unitPrice,
+    customName: item.customName ?? undefined,
+    customNumber: item.customNumber ?? undefined,
+    fabricType: item.fabricType ?? undefined,
+    collarType: item.collarType ?? undefined,
+    customizationNotes: item.customizationNotes ?? undefined,
+  };
+}
+
 interface UploadQueueItem {
   id: string;
   file: File;
@@ -76,7 +164,39 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
   const [phone, setPhone] = useState("");
   const [teamName, setTeamName] = useState("");
   const [productsSummary, setProductsSummary] = useState("");
-  const [totalQuantity, setTotalQuantity] = useState("50");
+  const nextGradeKey = useRef(0);
+  const [grade, setGrade] = useState<GradeRow[]>([]);
+  const [additionalItems, setAdditionalItems] = useState<SavedGradeItem[]>([]);
+  const gradeQuantity = grade.reduce((sum, row) => sum + (Number(row.quantity) || 0), 0);
+  const additionalQuantity = additionalItems.reduce((sum, item) => sum + item.quantity, 0);
+  const additionalSubtotal = additionalItems.reduce((sum, item) => sum + item.subtotal, 0);
+  const totalQuantity = String(gradeQuantity + additionalQuantity);
+
+  const newGradeRow = (quantity = "", gender = "", size = ""): GradeRow => ({
+    key: ++nextGradeKey.current,
+    gender,
+    size,
+    quantity,
+  });
+
+  const updateGradeRow = (key: number, fields: Partial<GradeRow>) => {
+    setGrade(rows => rows.map(row => {
+      if (row.key !== key) return row;
+      const updated = { ...row, ...fields };
+      if (fields.gender !== undefined && fields.gender !== row.gender) {
+        const compatible = isSizeCompatibleWithGender(row.size, fields.gender);
+        if (!compatible) {
+          updated.size = "";
+        }
+      }
+      return updated;
+    }));
+  };
+
+  const addGradeRow = () => {
+    const row = newGradeRow("", grade[grade.length - 1]?.gender, "");
+    setGrade(rows => [...rows, row]);
+  };
   const [budgetAmount, setBudgetAmount] = useState("1945.00");
   const [desiredDeadline, setDesiredDeadline] = useState("");
   const [briefingText, setBriefingText] = useState("");
@@ -173,6 +293,13 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
     return [];
   };
 
+  const catalogGenders = isCustomProduct ? [] : parseOptionsList(selectedProduct?.availableGenders);
+  const availableGenderOptions = GENDER_OPTIONS.filter(option => catalogGenders.includes(option.value));
+  const genderOptions = availableGenderOptions.length ? availableGenderOptions : GENDER_OPTIONS;
+  const catalogSizes = (!isCustomProduct && selectedProduct?.availableSizes)
+    ? parseOptionsList(selectedProduct.availableSizes)
+    : [];
+
   const loadQuotations = async () => {
     setIsLoading(true);
     try {
@@ -226,13 +353,13 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
   // - Nome e Número são sem custo adicional (+R$ 0)
   // - Escudo TPU 3D mantém a cobrança de +R$ 15 por peça
   useEffect(() => {
-    const qty = parseInt(totalQuantity, 10) || 0;
+    const qty = gradeQuantity;
     const tpuExtra = selectedCustomizations["Escudo TPU 3D"] ? 15.0 : 0;
 
     if (!isCustomProduct && selectedProduct) {
       const baseUnit = selectedProduct.basePrice || 0;
       const effectiveUnit = baseUnit + tpuExtra;
-      const total = effectiveUnit * qty;
+      const total = effectiveUnit * qty + additionalSubtotal;
       setBudgetAmount(total.toFixed(2));
       const fabricDisplay = isCustomFabric ? customFabricName : selectedFabric;
       setProductsSummary(
@@ -241,7 +368,7 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
     } else if (isCustomProduct) {
       const baseUnit = parseMonetaryInput(customUnitPrice);
       const effectiveUnit = baseUnit + tpuExtra;
-      const total = effectiveUnit * qty;
+      const total = effectiveUnit * qty + additionalSubtotal;
       setBudgetAmount(total.toFixed(2));
       const modelDisplay = customProductName.trim() || "Modelo Personalizado";
       const fabricDisplay = isCustomFabric ? customFabricName : selectedFabric;
@@ -254,7 +381,8 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
     customProductName,
     customUnitPrice,
     selectedProduct,
-    totalQuantity,
+    gradeQuantity,
+    additionalSubtotal,
     selectedCustomizations,
     selectedFabric,
     isCustomFabric,
@@ -298,6 +426,10 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
       const prod = catalogProducts.find((p) => p.id === val);
       if (prod) {
         setSelectedProduct(prod);
+        const genders = parseOptionsList(prod.availableGenders);
+        if (GENDER_OPTIONS.some(option => genders.includes(option.value))) {
+          setGrade(rows => rows.map(row => genders.includes(row.gender) ? row : { ...row, gender: "" }));
+        }
         const fabrics = parseOptionsList(prod.availableFabrics);
         if (fabrics.length > 0 && !isCustomFabric) setSelectedFabric(fabrics[0]);
         const collars = parseOptionsList(prod.availableCollars);
@@ -324,25 +456,31 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
     }
   };
 
-  // Upload assíncrono de múltiplos arquivos com controle de progresso e falhas
+  // Upload assíncrono de múltiplos arquivos com controle de progresso e falhas (limite até 3GB)
+  const MAX_FILE_SIZE_BYTES = 3 * 1024 * 1024 * 1024; // 3GB
+
   const handleFilesSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    const newItems: UploadQueueItem[] = Array.from(files).map((f) => ({
-      id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      file: f,
-      name: f.name,
-      size: f.size,
-      progress: 0,
-      status: "idle",
-    }));
+    const newItems: UploadQueueItem[] = Array.from(files).map((f) => {
+      const isExceeded = f.size > MAX_FILE_SIZE_BYTES;
+      return {
+        id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        file: f,
+        name: f.name,
+        size: f.size,
+        progress: 0,
+        status: isExceeded ? "error" : "idle",
+        error: isExceeded ? "Tamanho do arquivo excede o limite máximo permitido de 3GB." : undefined,
+      };
+    });
 
     setUploadQueue((prev) => [...prev, ...newItems]);
     if (fileInputRef.current) fileInputRef.current.value = "";
 
-    // Iniciar upload imediatamente para os arquivos adicionados
-    newItems.forEach((item) => executeUpload(item));
+    // Iniciar upload imediatamente para os arquivos válidos
+    newItems.filter((i) => i.status === "idle").forEach((item) => executeUpload(item));
   };
 
   const executeUpload = async (item: UploadQueueItem) => {
@@ -418,8 +556,9 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
     setPhone("");
     setTeamName("");
     setProductsSummary("");
-    setTotalQuantity("50");
-    setBudgetAmount("1945.00");
+    setGrade([newGradeRow("", "", "")]);
+    setAdditionalItems([]);
+    setBudgetAmount("0.00");
     setDesiredDeadline("");
     setBriefingText("");
     setIsCustomProduct(false);
@@ -445,6 +584,7 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
   };
 
   const openEditModal = (quotation: any) => {
+    setSelectedQuotation(null);
     setIsEditMode(true);
     setEditingQuotationId(quotation.id);
     setCustomerName(quotation.customer?.companyName || "");
@@ -452,7 +592,8 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
     setPhone(quotation.customer?.phone || "");
     setTeamName(quotation.teamName || "");
     setProductsSummary(quotation.productsSummary || "");
-    setTotalQuantity(String(quotation.totalQuantity || 50));
+    setGrade([newGradeRow(String(quotation.totalQuantity || 10), "UNISSEX", "G")]);
+    setAdditionalItems([]);
     setBudgetAmount(Number(quotation.budgetAmount || 0).toFixed(2));
     setDesiredDeadline(
       quotation.desiredDeadline ? quotation.desiredDeadline.substring(0, 10) : ""
@@ -473,8 +614,19 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
     }
     loadEligibleManagers();
 
-    const firstItem = quotation.items?.[0];
+    const savedItems: SavedGradeItem[] = quotation.items || [];
+    const firstItem = savedItems[0];
     if (firstItem) {
+      const editableItems = savedItems.filter(item => isSameGradeProduct(item, firstItem));
+      setGrade(editableItems.map(item => ({
+        key: ++nextGradeKey.current,
+        gender: item.gender || "",
+        size: item.size || "",
+        quantity: String(item.quantity),
+        customName: item.customName ?? undefined,
+        customNumber: item.customNumber ?? undefined,
+      })));
+      setAdditionalItems(savedItems.filter(item => !isSameGradeProduct(item, firstItem)));
       const notes = firstItem.customizationNotes || "";
       const hasTpu = notes.includes("TPU 3D") || notes.includes("Escudo");
 
@@ -496,7 +648,11 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
         setCustomProductName("");
         setCustomUnitPrice("38,90");
         const prod = catalogProducts.find((p) => p.id === firstItem.catalogProductId);
-        if (prod) setSelectedProduct(prod);
+        setSelectedProduct(prod || {
+          id: firstItem.catalogProductId,
+          name: firstItem.productModel,
+          basePrice: hasTpu ? firstItem.unitPrice - 15 : firstItem.unitPrice,
+        });
       }
 
       if (firstItem.isCustomFabric) {
@@ -545,11 +701,6 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
         setFormError("Informe um valor unitário maior que zero para o modelo personalizado.");
         return;
       }
-      const qtyVal = Number(totalQuantity);
-      if (isNaN(qtyVal) || !Number.isInteger(qtyVal) || qtyVal < 1) {
-        setFormError("A quantidade de peças deve ser um número inteiro de no mínimo 1 unidade.");
-        return;
-      }
     }
     if (isCustomFabric && !customFabricName.trim()) {
       setFormError("Informe o tecido desejado quando 'Outros' for selecionado.");
@@ -560,11 +711,11 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
       return;
     }
 
-    const qty = Number(totalQuantity);
-    if (isNaN(qty) || !Number.isInteger(qty) || qty < 1) {
-      setFormError("A quantidade total de peças deve ser um número inteiro maior ou igual a 1.");
+    if (grade.some(row => !row.gender || !row.size.trim() || !isSizeCompatibleWithGender(row.size, row.gender) || !Number.isSafeInteger(Number(row.quantity)) || Number(row.quantity) < 1)) {
+      setFormError("Selecione um gênero e um tamanho compatível em cada linha da grade (quantidade de pelo menos 1 peça).");
       return;
     }
+    const qty = Number(totalQuantity);
 
     // Regra de autorização por PIN para vendas abaixo de 10 peças
     if (qty < 10) {
@@ -595,7 +746,7 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
       }
 
       const effectiveUnit = Number((baseUnit + tpuExtra).toFixed(2));
-      const calculatedBudget = Number((effectiveUnit * qty).toFixed(2));
+      const calculatedBudget = Number((effectiveUnit * gradeQuantity + additionalSubtotal).toFixed(2));
 
       const customs: string[] = [];
       if (selectedCustomizations["Escudo TPU 3D"]) customs.push("Escudo TPU 3D");
@@ -609,7 +760,7 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
       const finalCollar = isCustomCollar ? customCollarName.trim() : selectedCollar;
 
       const itemsPayload = [
-        {
+        ...grade.map((row) => ({
           catalogProductId: isCustomProduct ? null : selectedProduct?.id || null,
           productModel: finalProductModel,
           isCustomModel: isCustomProduct,
@@ -618,15 +769,18 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
           customFabricName: isCustomFabric ? customFabricName.trim() : null,
           isCustomCollar: isCustomCollar,
           customCollarName: isCustomCollar ? customCollarName.trim() : null,
-          gender: "UNISSEX",
-          size: "G",
-          quantity: qty,
-          unitPrice: effectiveUnit,
-          subtotal: calculatedBudget,
+          gender: row.gender,
+          size: row.size.trim().toUpperCase(),
+          quantity: Number(row.quantity),
+          unitPrice: baseUnit,
+          subtotal: Number((effectiveUnit * Number(row.quantity)).toFixed(2)),
+          customName: row.customName,
+          customNumber: row.customNumber,
           fabricType: finalFabric || undefined,
           collarType: finalCollar || undefined,
           customizationNotes: customs.length > 0 ? customs.join(", ") : undefined,
-        },
+        })),
+        ...additionalItems.map(savedItemPayload),
       ];
 
       // Anexos concluídos com sucesso para vincular à ficha
@@ -770,15 +924,17 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
     setApprovalError("");
     setIsSubmittingApproval(true);
     try {
-      // 1. Registrar aprovação formal da versão de arte pelo cliente
-      await api.submitClientApproval(selectedQuotation.id, {
-        decision: "APPROVED",
-        approvedByPerson,
-        feedbackNotes: approvalNotes || "Arte aprovada pelo cliente.",
-      });
+      // 1. Se ainda não estava aprovada formalmente, registrar aprovação pelo cliente
+      if (!selectedQuotation.isArtworkApproved && selectedQuotation.status === "AGUARDANDO_APROVACAO_ARTE") {
+        await api.submitClientApproval(selectedQuotation.id, {
+          decision: "APPROVED",
+          approvedByPerson,
+          feedbackNotes: approvalNotes || "Arte aprovada pelo cliente.",
+        });
+      }
 
-      // 2. Se marcado para encaminhar imediatamente para produção, converter em OP
-      if (forwardToProduction) {
+      // 2. Se marcado para encaminhar para produção OU se a arte já estava aprovada (conversão explícita)
+      if (forwardToProduction || selectedQuotation.isArtworkApproved || selectedQuotation.status === "ORCAMENTO_APROVADO") {
         await api.convertToOp(selectedQuotation.id, {
           promisedDeliveryDate: new Date(promisedDeliveryDate).toISOString(),
           finalNegotiatedAmount: selectedQuotation.budgetAmount,
@@ -795,12 +951,12 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
         setSelectedQuotation(null);
       }
       alert(
-        forwardToProduction
-          ? "Arte aprovada e Ficha encaminhada ao SAC Interno com sucesso! Ordem de Produção (OP) gerada."
+        forwardToProduction || selectedQuotation.isArtworkApproved || selectedQuotation.status === "ORCAMENTO_APROVADO"
+          ? "Pedido revisado e convertido com sucesso! Ordem de Produção (OP) gerada e encaminhada ao SAC Interno."
           : "Arte aprovada com sucesso! Ficha atualizada para 'Orçamento Aprovado'."
       );
     } catch (err: any) {
-      setApprovalError(err.message || "Erro ao processar aprovação da arte.");
+      setApprovalError(err.message || "Erro ao processar conversão do pedido.");
     } finally {
       setIsSubmittingApproval(false);
     }
@@ -1018,6 +1174,9 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
                     onChange={(e) => handleSelectProduct(e.target.value)}
                     className="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-sm text-white focus:border-sky-500 focus:outline-none"
                   >
+                    {selectedProduct && !catalogProducts.some(p => p.id === selectedProduct.id) && (
+                      <option value={selectedProduct.id}>{selectedProduct.name}</option>
+                    )}
                     {catalogProducts.map((p) => (
                       <option key={p.id} value={p.id} className="bg-slate-900 text-white">
                         {p.name} — R$ {Number(p.basePrice).toFixed(2)} (Ref: {p.code})
@@ -1046,55 +1205,32 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <label className="text-xs text-amber-300 font-semibold block mb-1">
-                          Valor unitário (R$) *
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={customUnitPrice}
-                          onChange={(e) => setCustomUnitPrice(e.target.value)}
-                          placeholder="Ex: 38,90"
-                          className="w-full rounded-lg bg-slate-950 border border-amber-500/50 px-3 py-2 text-sm text-white focus:border-amber-400 focus:outline-none placeholder-slate-500"
-                        />
-                        <span className="text-[10px] text-amber-400/80">Aceita valores em reais com vírgula (ex: 38,90)</span>
-                      </div>
-
-                      <div>
-                        <label className="text-xs text-amber-300 font-semibold block mb-1">
-                          Quantidade de peças *
-                        </label>
-                        <input
-                          type="number"
-                          required
-                          min={1}
-                          step={1}
-                          value={totalQuantity}
-                          onChange={(e) => setTotalQuantity(e.target.value)}
-                          placeholder="Mínimo 1 peça"
-                          className="w-full rounded-lg bg-slate-950 border border-amber-500/50 px-3 py-2 text-sm text-white focus:border-amber-400 focus:outline-none"
-                        />
-                        <span className="text-[10px] text-amber-400/80">
-                          {parseInt(totalQuantity, 10) < 10
-                            ? "Abaixo de 10 peças requer autorização por PIN"
-                            : "Mínimo padrão: 10 unidades"}
-                        </span>
-                      </div>
+                    <div>
+                      <label className="text-xs text-amber-300 font-semibold block mb-1">
+                        Valor unitário (R$) *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={customUnitPrice}
+                        onChange={(e) => setCustomUnitPrice(e.target.value)}
+                        placeholder="Ex: 38,90"
+                        className="w-full rounded-lg bg-slate-950 border border-amber-500/50 px-3 py-2 text-sm text-white focus:border-amber-400 focus:outline-none placeholder-slate-500"
+                      />
+                      <span className="text-[10px] text-amber-400/80">Aceita valores em reais com vírgula (ex: 38,90)</span>
                     </div>
 
                     {/* Resumo visual do cálculo automático */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 p-2 rounded bg-amber-950/40 border border-amber-500/20 text-xs">
                       <span className="text-amber-200">
-                        Cálculo automático: {parseInt(totalQuantity, 10) || 0} peças × R${" "}
+                        Cálculo automático: {gradeQuantity} peças × R${" "}
                         {parseMonetaryInput(customUnitPrice).toFixed(2).replace(".", ",")}
                         {selectedCustomizations["Escudo TPU 3D"] && " (+ R$ 15,00 TPU 3D/peça)"}
                       </span>
                       <span className="font-bold text-amber-300">
                         Subtotal: R${" "}
                         {(
-                          (parseInt(totalQuantity, 10) || 0) *
+                          (gradeQuantity) *
                           (parseMonetaryInput(customUnitPrice) +
                             (selectedCustomizations["Escudo TPU 3D"] ? 15.0 : 0))
                         )
@@ -1192,6 +1328,95 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
                   </div>
                 </div>
 
+                <fieldset className="space-y-2">
+                  <legend className="text-xs font-medium text-slate-300">Grade de tamanhos</legend>
+                  {grade.map((row, index) => (
+                    <div key={row.key} className="grid grid-cols-3 items-end gap-2 sm:grid-cols-[1fr_1fr_1fr_auto]">
+                      <label className="text-xs text-slate-300">
+                        Gênero *
+                        <select
+                          aria-label={"Gênero da linha " + (index + 1)}
+                          required
+                          value={row.gender}
+                          onChange={event => updateGradeRow(row.key, { gender: event.target.value })}
+                          className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-2 py-2 text-xs text-white"
+                        >
+                          <option value="" disabled>Selecione</option>
+                          {genderOptions.map(option => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                          ))}
+                          {row.gender && !genderOptions.some(option => option.value === row.gender) && (
+                            <option value={row.gender}>
+                              {GENDER_OPTIONS.find(option => option.value === row.gender)?.label ?? row.gender}
+                            </option>
+                          )}
+                        </select>
+                      </label>
+                      <label className="text-xs text-slate-300">
+                        Tamanho *
+                        <select
+                          aria-label={"Tamanho da linha " + (index + 1)}
+                          required
+                          disabled={!row.gender}
+                          value={row.size}
+                          onChange={event => updateGradeRow(row.key, { size: event.target.value })}
+                          className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-2 py-2 text-xs text-white disabled:opacity-40"
+                        >
+                          <option value="" disabled>
+                            {row.gender ? "Selecione o tamanho" : "Selecione o gênero 1º"}
+                          </option>
+                          {/* Preservar tamanho legado registrado em ficha antiga se ainda compatível */}
+                          {row.size && !getAvailableSizesForGender(row.gender).includes(row.size.toUpperCase()) && isSizeCompatibleWithGender(row.size, row.gender) && (
+                            <option value={row.size}>{row.size}</option>
+                          )}
+                          {getAvailableSizesForGender(row.gender).map(size => (
+                            <option key={size} value={size}>{size}</option>
+                          ))}
+                        </select>
+                      </label>
+                      <label className="text-xs text-slate-300">
+                        Quantidade *
+                        <input
+                          aria-label={"Quantidade da linha " + (index + 1)}
+                          type="number"
+                          required
+                          min={1}
+                          step={1}
+                          value={row.quantity}
+                          onChange={event => updateGradeRow(row.key, { quantity: event.target.value })}
+                          placeholder="Ex. 10"
+                          className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-2 py-2 text-xs text-white"
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        aria-label={"Remover linha " + (index + 1)}
+                        disabled={grade.length === 1}
+                        onClick={() => setGrade(rows => rows.filter(item => item.key !== row.key))}
+                        className="inline-flex items-center justify-center rounded-lg border border-slate-700 px-2 py-2 text-slate-300 hover:text-rose-300 disabled:opacity-35"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                  <button type="button" onClick={addGradeRow} className="inline-flex items-center gap-1 text-xs font-semibold text-sky-300">
+                    <Plus className="h-3.5 w-3.5" /> Adicionar tamanho
+                  </button>
+                  {additionalItems.length > 0 && (
+                    <div className="pt-2 border-t border-slate-800">
+                      <span className="text-xs text-slate-400 font-medium block mb-1">Outros modelos já registrados nesta ficha:</span>
+                      <ul className="space-y-1 text-xs text-slate-400" aria-label="Outros itens da ficha">
+                        {additionalItems.map((item, index) => (
+                          <li key={index} className="flex items-center justify-between bg-slate-950/60 p-1.5 rounded border border-slate-800">
+                            <span>{item.isCustomModel ? `Outros: ${item.customModelName || item.productModel}` : item.productModel} · {GENDER_OPTIONS.find(g => g.value === item.gender)?.label || item.gender} / {item.size}</span>
+                            <span className="font-semibold text-white">{item.quantity} peças</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </fieldset>
+
                 {/* Opcionais e Personalizações */}
                 <div>
                   <label className="text-xs text-slate-300 font-medium block mb-1.5">
@@ -1257,7 +1482,7 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
                     min="1"
                     required
                     value={totalQuantity}
-                    onChange={(e) => setTotalQuantity(e.target.value)}
+                    readOnly
                     className="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-sm text-white focus:border-sky-500 focus:outline-none"
                   />
                 </div>
@@ -1668,10 +1893,10 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
                       <button
                         type="button"
                         onClick={() => handleOpenReviewApproveModal(selectedQuotation, true)}
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 text-xs font-semibold shadow-md shadow-emerald-600/30 transition"
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 text-xs font-semibold shadow-md shadow-emerald-600/30 transition"
                       >
                         <ArrowRight className="h-3.5 w-3.5" />
-                        Encaminhar ao Próximo Setor (Gerar OP)
+                        Revisar e converter em pedido
                       </button>
                     )
                   ) : (
@@ -1933,6 +2158,48 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
                 );
               })()}
 
+              {/* Grade e Modelos Solicitados */}
+              {selectedQuotation.items && selectedQuotation.items.length > 0 && (
+                <div className="pt-2 border-t border-slate-800/80 text-xs">
+                  <span className="text-slate-400 block font-medium mb-1.5">
+                    Grade e Modelos Solicitados ({selectedQuotation.items.length}):
+                  </span>
+                  <div className="overflow-x-auto rounded-lg border border-slate-800 bg-slate-900/50">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800">
+                        <tr>
+                          <th className="p-2">Modelo</th>
+                          <th className="p-2">Tecido / Gola</th>
+                          <th className="p-2 text-center">Gênero / Tam.</th>
+                          <th className="p-2 text-center">Qtd</th>
+                          <th className="p-2 text-right">Subtotal</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/60">
+                        {selectedQuotation.items.map((it: any, idx: number) => (
+                          <tr key={it.id || idx}>
+                            <td className="p-2 text-slate-200 font-medium">
+                              {it.isCustomModel ? `Outros: ${it.customModelName || it.productModel}` : it.productModel}
+                            </td>
+                            <td className="p-2 text-slate-400">
+                              {it.isCustomFabric ? `Outros: ${it.customFabricName || it.fabricType}` : it.fabricType || "Dry Fit"} ·{" "}
+                              {it.isCustomCollar ? `Outros: ${it.customCollarName || it.collarType}` : it.collarType || "Gola Careca"}
+                            </td>
+                            <td className="p-2 text-center text-slate-300">
+                              {GENDER_OPTIONS.find((g) => g.value === it.gender)?.label || it.gender || "Unissex"} / <span className="font-bold text-sky-400">{it.size || "M"}</span>
+                            </td>
+                            <td className="p-2 text-center font-bold text-white">{it.quantity}</td>
+                            <td className="p-2 text-right font-mono text-emerald-400">
+                              R$ {Number(it.subtotal || (it.unitPrice ? it.unitPrice * it.quantity : 0)).toFixed(2)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
               {/* Quantidade, Valor e Prazo */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-800/80 text-xs">
                 <div>
@@ -2167,7 +2434,11 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
                   <CheckCircle2 className="h-5 w-5 text-emerald-400" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white">Revisão da Ficha & Aprovação da Arte</h3>
+                  <h3 className="text-base font-bold text-white">
+                    {selectedQuotation.isArtworkApproved
+                      ? "Revisão da Ficha & Conversão em Pedido Real"
+                      : "Revisão da Ficha & Aprovação da Arte"}
+                  </h3>
                   <p className="text-xs text-slate-400 font-mono">
                     {selectedQuotation.quotationNumber} — {selectedQuotation.teamName}
                   </p>
@@ -2293,6 +2564,130 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
                   </div>
                 );
               })()}
+
+              {/* Grade e Modelos Solicitados */}
+              {selectedQuotation.items && selectedQuotation.items.length > 0 && (
+                <div className="pt-2 border-t border-slate-800/80 text-xs">
+                  <span className="text-slate-400 block font-medium mb-1.5">
+                    Grade e Modelos Solicitados ({selectedQuotation.items.length}):
+                  </span>
+                  <div className="overflow-x-auto rounded-lg border border-slate-800 bg-slate-900/50">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800">
+                        <tr>
+                          <th className="p-2">Modelo</th>
+                          <th className="p-2">Tecido / Gola</th>
+                          <th className="p-2 text-center">Gênero / Tam.</th>
+                          <th className="p-2 text-center">Qtd</th>
+                          <th className="p-2 text-right">Subtotal</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/60">
+                        {selectedQuotation.items.map((it: any, idx: number) => (
+                          <tr key={it.id || idx}>
+                            <td className="p-2 text-slate-200 font-medium">
+                              {it.isCustomModel ? `Outros: ${it.customModelName || it.productModel}` : it.productModel}
+                            </td>
+                            <td className="p-2 text-slate-400">
+                              {it.isCustomFabric ? `Outros: ${it.customFabricName || it.fabricType}` : it.fabricType || "Dry Fit"} ·{" "}
+                              {it.isCustomCollar ? `Outros: ${it.customCollarName || it.collarType}` : it.collarType || "Gola Careca"}
+                            </td>
+                            <td className="p-2 text-center text-slate-300">
+                              {GENDER_OPTIONS.find((g) => g.value === it.gender)?.label || it.gender || "Unissex"} / <span className="font-bold text-sky-400">{it.size || "M"}</span>
+                            </td>
+                            <td className="p-2 text-center font-bold text-white">{it.quantity}</td>
+                            <td className="p-2 text-right font-mono text-emerald-400">
+                              R$ {Number(it.subtotal || (it.unitPrice ? it.unitPrice * it.quantity : 0)).toFixed(2)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* Opcionais e Personalizações */}
+              {(() => {
+                const allCustomNotes = [
+                  selectedQuotation.observations || "",
+                  ...(selectedQuotation.items || []).map((it: any) => `${it.customizationNotes || ""} ${it.notes || ""}`)
+                ].join(" ");
+                const hasTpu = allCustomNotes.includes("TPU 3D") || allCustomNotes.includes("Escudo");
+                const hasNome = allCustomNotes.includes("Nome") || (selectedQuotation.items || []).some((it: any) => it.customName);
+                const hasNumero = allCustomNotes.includes("Número") || allCustomNotes.includes("Numero") || (selectedQuotation.items || []).some((it: any) => it.customNumber);
+
+                return (
+                  <div className="pt-2 border-t border-slate-800/80 text-xs">
+                    <span className="text-slate-400 block mb-1 font-medium">Opcionais e Personalizações:</span>
+                    <div className="flex flex-wrap gap-2">
+                      <span className={`px-2.5 py-1 rounded border text-[11px] font-semibold ${
+                        hasTpu
+                          ? "bg-amber-500/20 text-amber-300 border-amber-500/40"
+                          : "bg-slate-900 text-slate-500 border-slate-800"
+                      }`}>
+                        Escudo TPU 3D {hasTpu ? "(+ R$ 15,00/peça)" : "(Não aplicado)"}
+                      </span>
+                      <span className={`px-2.5 py-1 rounded border text-[11px] font-semibold ${
+                        hasNome
+                          ? "bg-sky-500/20 text-sky-300 border-sky-500/40"
+                          : "bg-slate-900 text-slate-500 border-slate-800"
+                      }`}>
+                        Nome Individual {hasNome ? "(R$ 0,00 - Sem acréscimo)" : "(Não aplicado)"}
+                      </span>
+                      <span className={`px-2.5 py-1 rounded border text-[11px] font-semibold ${
+                        hasNumero
+                          ? "bg-sky-500/20 text-sky-300 border-sky-500/40"
+                          : "bg-slate-900 text-slate-500 border-slate-800"
+                      }`}>
+                        Número Individual {hasNumero ? "(R$ 0,00 - Sem acréscimo)" : "(Não aplicado)"}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Grade e Modelos Solicitados */}
+              {selectedQuotation.items && selectedQuotation.items.length > 0 && (
+                <div className="pt-2 border-t border-slate-800/80 text-xs">
+                  <span className="text-slate-400 block font-medium mb-1.5">
+                    Grade e Modelos Solicitados ({selectedQuotation.items.length}):
+                  </span>
+                  <div className="overflow-x-auto rounded-lg border border-slate-800 bg-slate-900/50">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800">
+                        <tr>
+                          <th className="p-2">Modelo</th>
+                          <th className="p-2">Tecido / Gola</th>
+                          <th className="p-2 text-center">Gênero / Tam.</th>
+                          <th className="p-2 text-center">Qtd</th>
+                          <th className="p-2 text-right">Subtotal</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/60">
+                        {selectedQuotation.items.map((it: any, idx: number) => (
+                          <tr key={it.id || idx}>
+                            <td className="p-2 text-slate-200 font-medium">
+                              {it.isCustomModel ? `Outros: ${it.customModelName || it.productModel}` : it.productModel}
+                            </td>
+                            <td className="p-2 text-slate-400">
+                              {it.isCustomFabric ? `Outros: ${it.customFabricName || it.fabricType}` : it.fabricType || "Dry Fit"} ·{" "}
+                              {it.isCustomCollar ? `Outros: ${it.customCollarName || it.collarType}` : it.collarType || "Gola Careca"}
+                            </td>
+                            <td className="p-2 text-center text-slate-300">
+                              {GENDER_OPTIONS.find((g) => g.value === it.gender)?.label || it.gender || "Unissex"} / <span className="font-bold text-sky-400">{it.size || "M"}</span>
+                            </td>
+                            <td className="p-2 text-center font-bold text-white">{it.quantity}</td>
+                            <td className="p-2 text-right font-mono text-emerald-400">
+                              R$ {Number(it.subtotal || (it.unitPrice ? it.unitPrice * it.quantity : 0)).toFixed(2)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
 
               <div className="pt-2 border-t border-slate-800/80 text-xs">
                 <span className="text-slate-400 block mb-1">Briefing Inicial do Designer:</span>
@@ -2420,12 +2815,12 @@ export function PreVendaKanban({ currentUser }: { currentUser?: any }) {
                   {isSubmittingApproval ? (
                     <>
                       <RotateCcw className="h-3.5 w-3.5 animate-spin" />
-                      Processando...
+                      Convertendo em OP...
                     </>
-                  ) : forwardToProduction ? (
+                  ) : selectedQuotation.isArtworkApproved || forwardToProduction ? (
                     <>
                       <CheckCircle2 className="h-3.5 w-3.5" />
-                      Confirmar Aprovação e Encaminhar ao SAC Interno
+                      Confirmar e Converter em Pedido Real (Gerar OP)
                     </>
                   ) : (
                     <>

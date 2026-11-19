@@ -341,5 +341,117 @@ test("Fluxo Completo de Aprovação da Arte na Pré-Venda", async (t) => {
     // Vendedor 2 continua sem acesso ao arquivo
     const resDlOtherStillBlocked = await fetch(`${baseUrl}/api/files/artwork/${artFile2}?token=${encodeURIComponent(tokenSeller2)}`);
     assert.equal(resDlOtherStillBlocked.status, 403);
+
+    // Tentativa repetida de conversão é bloqueada com 409 Conflict (garante OP única)
+    const resDuplicateConvert = await fetch(`${baseUrl}/api/quotations/${quotationId}/convert-to-op`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${tokenSeller1}`,
+      },
+      body: JSON.stringify({
+        promisedDeliveryDate: new Date(Date.now() + 15 * 86400000).toISOString(),
+      }),
+    });
+    assert.equal(resDuplicateConvert.status, 409, "Segunda tentativa de conversão deve retornar 409");
+  });
+
+  // Caminho alternativo: Cliente aprova a Versão 1 de primeira
+  await t.test("Caminho direto: Cliente aprova a v1 de primeira, vendedor revisa e converte em OP", async () => {
+    const resCreateDirect = await fetch(`${baseUrl}/api/quotations`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${tokenSeller1}`,
+      },
+      body: JSON.stringify({
+        customer: {
+          companyName: `Atlética Direta ${timestamp}`,
+          contactName: "Cliente Direto",
+          phone: "11988880000",
+        },
+        teamName: "Time Aprovação Direta v1",
+        productModel: "CAMISA_FUTEBOL_ELITE",
+        fabricType: "Dry Fit Tradicional",
+        collarType: "Gola Careca",
+        totalQuantity: 20,
+        budgetAmount: 800,
+        desiredDeadline: new Date(Date.now() + 10 * 86400000).toISOString(),
+        briefingText: "Layout direto v1",
+      }),
+    });
+
+    assert.equal(resCreateDirect.status, 201);
+    const directQuotation = await resCreateDirect.json();
+
+    // Mover para SOLICITACAO_ARTE
+    await fetch(`${baseUrl}/api/quotations/${directQuotation.id}/status`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${tokenSeller1}`,
+      },
+      body: JSON.stringify({ status: "SOLICITACAO_ARTE" }),
+    });
+
+    const directArtFile = `arte-direct-v1-${timestamp}.png`;
+    fs.writeFileSync(path.join(artworkDir, directArtFile), Buffer.from("MOCKUP_DIRECT_V1"));
+
+    // Designer assume e anexa Versão 1
+    await fetch(`${baseUrl}/api/design/${directQuotation.id}/claim`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${tokenDesigner}` },
+    });
+
+    await fetch(`${baseUrl}/api/design/${directQuotation.id}/versions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${tokenDesigner}`,
+      },
+      body: JSON.stringify({
+        previewUrl: `/api/files/artwork/${directArtFile}`,
+        changeNotes: "Versão 1 aprovada de primeira pelo cliente",
+      }),
+    });
+
+    // Vendedor 1 aprova diretamente a v1
+    const resApproveDirect = await fetch(`${baseUrl}/api/quotations/${directQuotation.id}/client-approval`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${tokenSeller1}`,
+      },
+      body: JSON.stringify({
+        decision: "APPROVED",
+        approvedByPerson: "Cliente Direto",
+        feedbackNotes: "Aprovado de primeira sem alterações.",
+      }),
+    });
+
+    assert.equal(resApproveDirect.status, 200);
+
+    // Vendedor 1 revisa e converte diretamente em OP
+    const resConvertDirect = await fetch(`${baseUrl}/api/quotations/${directQuotation.id}/convert-to-op`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${tokenSeller1}`,
+      },
+      body: JSON.stringify({
+        promisedDeliveryDate: new Date(Date.now() + 10 * 86400000).toISOString(),
+        technicalNotes: "Produzir com arte v1 oficial aprovada de primeira.",
+      }),
+    });
+
+    assert.equal(resConvertDirect.status, 201);
+    const convertDirectData = await resConvertDirect.json();
+    assert.equal(convertDirectData.productionOrder.artworkUrl, `/api/files/artwork/${directArtFile}`);
+
+    // SAC Interno acessa a v1 aprovada
+    const resDlSacDirect = await fetch(`${baseUrl}/api/files/artwork/${directArtFile}?token=${encodeURIComponent(tokenSac)}`);
+    assert.equal(resDlSacDirect.status, 200);
+    const sacContentDirect = await resDlSacDirect.text();
+    assert.equal(sacContentDirect, "MOCKUP_DIRECT_V1");
   });
 });
